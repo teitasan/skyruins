@@ -21,6 +21,8 @@ Kenney の取得アーカイブ:
 
 モデルと必要なテクスチャをプロジェクト内に収録し、ゲーム実行時の外部モデル配信に依存しません。
 モデル自体は再制作せず、配置・サイズ・アニメーションの切り替えでゲームに組み込んでいます。
+動きの重さの調整にも、収録済みの KayKit `Walking_A` / `Jump_Idle` / `Jump_Land` を再利用しています。
+再生速度・切り替えは Three.js の既存 AnimationAction API（https://threejs.org/docs/pages/AnimationAction.html）を使用し、新しいアニメーション素材やライブラリは追加していません。
 
 ## 調査と選択理由
 

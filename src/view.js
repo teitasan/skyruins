@@ -165,13 +165,16 @@ export async function createView(canvas, onProgress) {
     const mixer = new THREE.AnimationMixer(group);
     const actions = Object.fromEntries(models[key].animations.map(clip => [clip.name, mixer.clipAction(clip)]));
     let current = null;
-    return { group, mixer, actions, animate(name) {
+    return { group, mixer, actions, animate(name, speed = 1) {
+      actions[name]?.setEffectiveTimeScale(speed);
       if (name === current || !actions[name]) return;
-      if (current) actions[current]?.fadeOut(.12);
-      actions[name].reset().fadeIn(.12).play(); current = name;
+      if (current) actions[current]?.fadeOut(.16);
+      actions[name].reset().fadeIn(name === 'Jump_Land' ? .06 : .16).play(); current = name;
     } };
   }
   const hero = actor('hero', [.62, 1.02, .58]);
+  hero.actions.Jump_Land.setLoop(THREE.LoopOnce, 1);
+  hero.actions.Jump_Land.clampWhenFinished = true;
   scene.add(hero.group); hero.animate('Idle');
   const creatures = new Map();
   const items = new Map();
@@ -215,6 +218,7 @@ export async function createView(canvas, onProgress) {
   }
   let flag = null;
   let cameraX = 5.7, cameraY = -13.8, lastTime = performance.now(), previousPlayer = null;
+  let wasGrounded = false, landingUntil = 0;
   function sweep(map, live, cleanup = () => {}) {
     for (const [entity, object] of map) if (!live.has(entity)) {
       scene.remove(object.group || object); cleanup(object); map.delete(entity);
@@ -230,9 +234,16 @@ export async function createView(canvas, onProgress) {
     hero.group.visible = Boolean(P) && !(P.inv > 0 && Math.floor(frame / 3) % 2);
     if (P) {
       hero.group.position.set((P.x + P.w / 2) / TILE, -(P.y + P.h) / TILE, 0);
-      hero.group.rotation.y = P.face * (Math.PI / 2 - .22);
-      const name = mode === 'dying' ? 'Death_A_Pose' : !P.onGround ? 'Jump_Idle' : P.cd > 12 ? '1H_Ranged_Shooting' : Math.abs(P.vx) > .2 ? 'Running_A' : 'Idle';
-      hero.animate(name); hero.mixer.update(moving ? dt : 0);
+      if (previousPlayer !== P) { wasGrounded = P.onGround; landingUntil = 0; hero.group.rotation.y = P.face * (Math.PI / 2 - .22); }
+      if (moving) {
+        hero.group.rotation.y = THREE.MathUtils.damp(hero.group.rotation.y, P.face * (Math.PI / 2 - .22), 18, dt);
+        if (P.onGround && !wasGrounded) landingUntil = frame + 30;
+        wasGrounded = P.onGround;
+      }
+      const speed = Math.abs(P.vx);
+      const name = mode === 'dying' ? 'Death_A_Pose' : !P.onGround ? 'Jump_Idle' : P.cd > 12 ? '1H_Ranged_Shooting' : speed > .12 ? 'Walking_A' : frame < landingUntil ? 'Jump_Land' : 'Idle';
+      const rate = name === 'Walking_A' ? THREE.MathUtils.clamp(speed / 1.25 * .85, .3, 1.3) : name === 'Jump_Idle' ? .7 : 1;
+      hero.animate(name, rate); hero.mixer.update(moving ? dt : 0);
       const targetX = THREE.MathUtils.clamp(hero.group.position.x + 1.8, halfWidth, Math.max(halfWidth, L.w - halfWidth));
       const targetY = Math.max(-13.8, hero.group.position.y + 1.2);
       if (previousPlayer !== P) { cameraX = targetX; cameraY = targetY; previousPlayer = P; }
@@ -251,7 +262,7 @@ export async function createView(canvas, onProgress) {
       if (!a) {
         const big = e.type === 'K';
         a = actor(e.type, [big ? 2.3 : .76, big ? 1.9 : .67, big ? 1.65 : .58]);
-        a.hp = hpBar(a.group); a.animate('walk'); scene.add(a.group); creatures.set(e, a);
+        a.hp = hpBar(a.group); a.animate('walk', .75); scene.add(a.group); creatures.set(e, a);
       }
       a.group.position.set((e.x + e.w / 2) / TILE, -(e.y + e.h) / TILE, 0);
       a.group.rotation.y = e.dir * (Math.PI / 2 - .38);
@@ -271,7 +282,7 @@ export async function createView(canvas, onProgress) {
       const coin = coins.includes(c);
       if (!mesh) { mesh = model(coin ? 'coin' : 'heart').clone(true); mesh.scale.setScalar(coin ? .4 : .43); scene.add(mesh); items.set(c, mesh); }
       mesh.position.set((c.x + 4) / TILE, -(c.y + 5) / TILE + .08 * Math.sin(frame * .06 + (c.ph || 0)), 0);
-      mesh.rotation.y = frame * .055;
+      mesh.rotation.y = frame * .03;
     }
     const liveBolts = new Set(bullets.filter(b => b.life > 0)); sweep(bolts, liveBolts);
     for (const b of liveBolts) {

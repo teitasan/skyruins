@@ -4,10 +4,10 @@ export function createGame(view) {
 /* ================= BALANCE（調整用の数値はここに集約） ================= */
 const B = {
   // 物理（1フレーム=1/60秒、単位はpx）
-  gravity: 0.35, gravityRelease: 0.42, maxFall: 7,
-  runBase: 1.8, runPerLv: 0.3,
-  accelGround: 0.3, accelAir: 0.12, airPerLv: 0.08, friction: 0.28,
-  jumpBase: 6.0, jumpPerLv: 0.45, extraJumpV: 5.4,
+  gravity: 0.23, fallGravity: 0.4, gravityRelease: 0.36, maxFall: 5.8,
+  runBase: 1.25, runPerLv: 0.22,
+  accelGround: 0.16, accelAir: 0.08, airPerLv: 0.055, friction: 0.2,
+  jumpBase: 4.9, jumpPerLv: 0.36, extraJumpV: 4.6,
   coyote: 6, jumpBuffer: 7, floatFall: 1.1,
   // 射撃
   atkBase: 1.0, atkPerLv: 0.2,
@@ -15,7 +15,7 @@ const B = {
   shotSpeed: 4.6, shotLifeBase: 42, shotLifePerLv: 18,
   twoWayVy: 1.3, pierceByLv: [1, 2, 3, 99],
   // 踏みつけ
-  stompBase: 2, stompPerLv: 1, bounceBase: 4.2, bouncePerLv: 0.7, bounceHold: 1.6, shockRadius: 46,
+  stompBase: 2, stompPerLv: 1, bounceBase: 3.4, bouncePerLv: 0.57, bounceHold: 1.3, shockRadius: 46,
   // ハート（HPは半ハート単位）
   heartsBase: 4, iframeBase: 70, iframePerLv: 30, knockVx: 2.6, knockVy: 3.2,
   dmgContact: 1, dmgSpike: 1, dmgFall: 2,
@@ -24,10 +24,10 @@ const B = {
   keepCoinsOnMiss: false,
   // 敵
   enemies: {
-    s: { hp: 2, speed: 0.45, coin: 2 },  // スライム
-    b: { hp: 5, speed: 0.32, coin: 3 },  // ブルーブロブ
-    f: { hp: 2, speed: 0.6,  coin: 2 },  // リーフバグ（飛行）
-    k: { hp: 3, speed: 0.4,  coin: 3 },  // トゲスライム（踏めない）
+    s: { hp: 2, speed: 0.34, coin: 2 },  // スライム
+    b: { hp: 5, speed: 0.25, coin: 3 },  // ブルーブロブ
+    f: { hp: 2, speed: 0.45, coin: 2 },  // リーフバグ（飛行）
+    k: { hp: 3, speed: 0.3,  coin: 3 },  // トゲスライム（踏めない）
     K: { hp: 30, coin: 25 },             // キングスライム
   },
   enemyHpPerStage: 0.15, bossHpPerBoss: 10,
@@ -399,8 +399,8 @@ function updatePlayer() {
       burst(p.x + p.w / 2, p.y + p.h, 8, ['#ffffff', '#bfe3ff'], 1.4, 0, 16);
     }
   }
-  // 重力（ボタンを離していると重く＝小ジャンプ）
-  let g = B.gravity;
+  // 高さは保ちつつ上昇を穏やかに、落下は重く。離すと小ジャンプになる。
+  let g = p.vy < 0 ? B.gravity : B.fallGravity;
   if (p.vy < 0 && !K.jump && !p.bouncing) g = B.gravity + B.gravityRelease;
   p.vy += g;
   const maxF = (ST.float && K.jump && p.vy > 0) ? B.floatFall : B.maxFall;
@@ -503,17 +503,17 @@ function updateEnemies() {
     const cfg = B.enemies[e.type];
     if (e.type === 'f') {
       const dx = p.x - e.x, near = Math.abs(dx) < 170 && mode === 'play';
-      e.x += near ? Math.sign(dx) * cfg.speed : Math.sin(e.t * 0.02) * 0.5;
+      e.x += near ? Math.sign(dx) * cfg.speed : Math.sin(e.t * 0.015) * 0.38;
       e.dir = near ? Math.sign(dx) || e.dir : (Math.cos(e.t * 0.02) > 0 ? 1 : -1);
       const ty = near ? Math.min(p.y - 6, e.homeY + 20) : e.homeY;
-      e.homeY += 0; e.y += ((ty + Math.sin(e.t * 0.06) * 10) - e.y) * 0.03;
+      e.y += ((ty + Math.sin(e.t * 0.045) * 10) - e.y) * 0.03;
     } else if (e.type === 'K') {
       const wasAir = !e.onGround;
       if (e.onGround) {
-        e.vx = Math.sign(p.x - e.x) * 0.45; e.dir = Math.sign(e.vx) || e.dir;
-        if (e.t % 140 === 0) { e.vy = -6.6; e.vx = Math.sign(p.x - e.x) * 1.7; }
+        e.vx = Math.sign(p.x - e.x) * 0.34; e.dir = Math.sign(e.vx) || e.dir;
+        if (e.t % 140 === 0) { e.vy = -5.4; e.vx = Math.sign(p.x - e.x) * 1.3; }
       }
-      e.vy = Math.min(e.vy + B.gravity, B.maxFall);
+      e.vy = Math.min(e.vy + (e.vy < 0 ? B.gravity : B.fallGravity), B.maxFall);
       if (moveX(e, e.vx)) e.vx = 0;
       moveY(e, e.vy);
       if (wasAir && e.onGround && e.t > 30) {
@@ -523,9 +523,9 @@ function updateEnemies() {
       }
     } else {
       e.vx = e.dir * cfg.speed;
-      if (e.type === 'b' && e.onGround && e.t % 110 === 0) e.vy = -3.4;
+      if (e.type === 'b' && e.onGround && e.t % 110 === 0) e.vy = -2.8;
       if (moveX(e, e.vx)) e.dir *= -1;
-      e.vy = Math.min(e.vy + B.gravity, B.maxFall);
+      e.vy = Math.min(e.vy + (e.vy < 0 ? B.gravity : B.fallGravity), B.maxFall);
       moveY(e, e.vy);
       if (e.onGround) {
         const fx = e.dir > 0 ? e.x + e.w + 1 : e.x - 1, fy = Math.floor((e.y + e.h + 1) / T);

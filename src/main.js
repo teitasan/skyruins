@@ -27,6 +27,11 @@ try {
         const enemy = game.enemies.find(e => e.type === 's' || e.type === 'b');
         if (enemy) Object.assign(game.P,{x:enemy.x-50,y:enemy.y+enemy.h-game.P.h,vx:0,vy:0,onGround:true});
       },
+      'ジャンプ頂点の描画を確認': () => {
+        game.beginFrom({stage:1,coins:0,skills:{}});
+        game.step(2); game.setKey('jump',true); game.step(28);
+        game.setKey('jump',false); game.togglePause();
+      },
       'スキル画面を確認': () => game.openTree(false),
       'クリア進行を確認': () => {if (game.mode === 'tree') game.startStage(game.save.stage);game.clearStage();},
     };

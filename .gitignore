@@ -1,6 +1,7 @@
 .DS_Store
 node_modules/
 dist/
+art/blender/*.blend[1-9]
 .env
 .env.*
 !.env.example

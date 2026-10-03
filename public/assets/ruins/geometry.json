@@ -1,0 +1,74 @@
+[
+  {
+    "name": "bridge-01",
+    "width": 1,
+    "top": 0,
+    "foundationDepth": 1.55
+  },
+  {
+    "name": "bridge-02",
+    "width": 2,
+    "top": 0,
+    "foundationDepth": 1.55
+  },
+  {
+    "name": "bridge-03",
+    "width": 3,
+    "top": 0,
+    "foundationDepth": 1.55
+  },
+  {
+    "name": "bridge-04",
+    "width": 4,
+    "top": 0,
+    "foundationDepth": 1.55
+  },
+  {
+    "name": "bridge-05",
+    "width": 5,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-06",
+    "width": 6,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-07",
+    "width": 7,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-08",
+    "width": 8,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-09",
+    "width": 9,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-10",
+    "width": 10,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-11",
+    "width": 11,
+    "top": 0,
+    "foundationDepth": 4.8
+  },
+  {
+    "name": "bridge-12",
+    "width": 12,
+    "top": 0,
+    "foundationDepth": 4.8
+  }
+]

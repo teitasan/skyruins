@@ -310,6 +310,86 @@
     "bytes": 42680
   },
   {
+    "path": "assets/ruins/SOURCE.md",
+    "sha256": "f106eff3955773c21c9ab8f23b6b90f2431c6501a49db99f5017e04de8c8b7cd",
+    "bytes": 2279
+  },
+  {
+    "path": "assets/ruins/bridge-01.glb",
+    "sha256": "f6fd022ee80897eaa4e9fd623d4af6e06c5495850f9d48c85438b3d174b53e74",
+    "bytes": 137480
+  },
+  {
+    "path": "assets/ruins/bridge-02.glb",
+    "sha256": "55f8067ce836915d4c79b70b49661fd2dcf4307aa6af0d8d63dde9425005ae1b",
+    "bytes": 183736
+  },
+  {
+    "path": "assets/ruins/bridge-03.glb",
+    "sha256": "38ce60c9e055f84a8ff1c902093dd621eb2145cf4be7f93b05f6a0fddc9064d0",
+    "bytes": 254500
+  },
+  {
+    "path": "assets/ruins/bridge-04.glb",
+    "sha256": "60aa2744aa816edb48019623a5d1627982b372528811cbbe7490c7c8a7db7464",
+    "bytes": 333016
+  },
+  {
+    "path": "assets/ruins/bridge-05.glb",
+    "sha256": "17dba9cd7c5a21ac080cafb84ee34cb98a2dbed77c2fad5913f59f6d7c1d088d",
+    "bytes": 512640
+  },
+  {
+    "path": "assets/ruins/bridge-06.glb",
+    "sha256": "0b74b41bad23b0b1511b5a1198374e65261bdac8278d7045074977ed8d4b763f",
+    "bytes": 587320
+  },
+  {
+    "path": "assets/ruins/bridge-07.glb",
+    "sha256": "25375352222523f1f4985c0d9c5a010923b6a253086d6070ac98477aae228c40",
+    "bytes": 673636
+  },
+  {
+    "path": "assets/ruins/bridge-08.glb",
+    "sha256": "82b2d9ce4a90eae7ec4df81b5c21238dfbe5503b4f48fa171c346b5633050f86",
+    "bytes": 738572
+  },
+  {
+    "path": "assets/ruins/bridge-09.glb",
+    "sha256": "294f7709a41bdca40dd41193b14c09a47a31126128c95b32fe350b5583ea39f2",
+    "bytes": 812816
+  },
+  {
+    "path": "assets/ruins/bridge-10.glb",
+    "sha256": "c45118c9dc57fef77bb6e7fbc21152b372c2716e4aefebe6c0cb29e6b615f77b",
+    "bytes": 887064
+  },
+  {
+    "path": "assets/ruins/bridge-11.glb",
+    "sha256": "b7d7363b07412b878859ba084b1ededbaf10eb7737b948f3bc48f0ce468fb879",
+    "bytes": 927884
+  },
+  {
+    "path": "assets/ruins/bridge-12.glb",
+    "sha256": "82285fcba31dc6caa4335d5061babbb055c23cb1436b572b3475822333dd0499",
+    "bytes": 1048244
+  },
+  {
+    "path": "assets/ruins/cliff-skirt.glb",
+    "sha256": "f7a9ebaa8f8431b79e7a6cdacb817c83b974b4cc928758e452dc8f392c859a00",
+    "bytes": 13636
+  },
+  {
+    "path": "assets/ruins/geometry.json",
+    "sha256": "8bb645901c6b3bb633a8e5e0ca817867174cf5c22677c4590dd0483945bf3b4d",
+    "bytes": 1102
+  },
+  {
+    "path": "assets/ruins/mesa.glb",
+    "sha256": "3a463a7489e9e66d737fe2cca86e1e64877f6379869611b6fd22e40b8c986a85",
+    "bytes": 14492
+  },
+  {
     "path": "assets/scenery/SOURCE.md",
     "sha256": "7ebd455cd2d2d23993984be905876f948d5fb0684064938387b651fe968e9c78",
     "bytes": 942

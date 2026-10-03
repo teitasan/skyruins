@@ -14,6 +14,7 @@
 | 屋外の環境光 | Poly Haven / Kloofendal 48d Partly Cloudy Pure Sky / Greg Zaal, Jarod Guest | CC0 1.0 | https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky |
 | HUDのハート形状 | Bootstrap Icons 1.11.3 / The Bootstrap Authors | MIT | https://icons.getbootstrap.com/icons/heart-fill/ |
 | 空の遺跡の遠景パノラマ | このプロジェクト向けのimage_gen生成素材 | AI生成のプロジェクト素材 | `public/assets/scenery/SOURCE.md` |
+| 連続したアーチ橋、欠けた舗装、深い岩盤 | Blender 5.2でプロジェクト向けに制作。舗装はKenneyのCC0石材形状を改修 | 改修元はCC0、新規形状はプロジェクト制作 | `public/assets/ruins/SOURCE.md` / `art/blender/ruins-source.blend` |
 
 Kenney / KayKit の CC0 素材にクレジット表示義務はありませんが、作者と出典を記録しています。
 Three.js の著作権・MITライセンス全文は `public/licenses/three-LICENSE.txt` に保持しています。
@@ -30,7 +31,7 @@ Kenney の取得アーカイブ:
 - https://kenney.nl/media/pages/assets/castle-kit/a395102d20-1711543616/kenney_castle-kit.zip
 
 モデルと必要なテクスチャをプロジェクト内に収録し、ゲーム実行時の外部モデル配信に依存しません。
-モデル自体は再制作せず、配置・サイズ・アニメーションの切り替えでゲームに組み込んでいます。
+主人公・敵・植生は、配置・サイズ・アニメーションの切り替えでゲームに組み込んでいます。橋と岩盤はBlenderで改修・制作した形状に更新しています。
 動きの重さの調整にも、収録済みの KayKit `Walking_A` / `Jump_Idle` / `Jump_Land` を再利用しています。
 再生速度・切り替えは Three.js の既存 AnimationAction API（https://threejs.org/docs/pages/AnimationAction.html）を使用し、新しいアニメーション素材やライブラリは追加していません。
 描画の位置補間には、同じMITライセンスの Three.js `MathUtils.lerp` を再利用しています。固定物理更新と描画の間を補間する方法は Glenn Fiedler の解説 https://gafferongames.com/post/fix_your_timestep/ を参照し、記事のコードは転載していません。既存の衝突処理を保つため、物理エンジンの追加は行っていません。
@@ -43,7 +44,7 @@ Kenney の取得アーカイブ:
 - Kenney Platformer Kit の主人公候補: アニメーション付きですが、人間の冒険者という方向には KayKit Rogue のほうが合うため、主人公には採用せず敵として利用しています。
 - GamepadJs: https://github.com/alaingilbert/GamepadJs (MIT) を調査。既存ゲームはフレームごとの押下状態と入力エッジを使うため、ブラウザ標準 Gamepad API を既存入力につなぐ最小限のアダプターを使用しています。
 
-新規コードは描画と既存処理の接続、入力の接続に限定し、ゲームシステムやキャラクターモデルの新規制作は行っていません。
+ゲームシステムとキャラクターモデルは既存品を再利用しています。地形の調査・改修内容とBlenderの生成手順は `public/assets/ruins/SOURCE.md` に記録しています。
 遠景の生成前には上記のCC0素材を実画面で比較しました。汎用の塔や壁を繰り返し配置すると、参照画像のような谷・橋・城の構図を作れなかったため、背景画を制作しました。新しい主人公モデルは制作せず、KayKitの既存モデルを再利用し、赤いマントと不要な武器の非表示で調整しています。
 植生のバッチ描画では元の頂点カラーとアルファテストを保持しています。光のにじみはThree.jsのMITライセンス付き `UnrealBloomPass` / `OutputPass` を使用しています。
 Google Fonts は元のHTMLから継続利用しています。利用不能の場合はシステムフォントにフォールバックします。

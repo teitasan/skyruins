@@ -18,12 +18,14 @@ const specifications = {
   spikes: ['platformer', 'trap-spikes'], flag: ['platformer', 'flag'], ladder: ['platformer', 'ladder'],
   s: ['platformer', 'character-oobi'], b: ['platformer', 'character-ooli'],
   f: ['platformer', 'character-oodi'], k: ['platformer', 'character-oozi'], K: ['platformer', 'character-oobi'],
-  arch: ['castle', 'tower-square-arch'], pillar: ['castle', 'wall-pillar'],
-  cliff: ['nature', 'Rock_Medium_1', 'gltf'],
+  pillar: ['castle', 'wall-pillar'],
   broadTree: ['nature', 'CommonTree_1', 'gltf'],
   fern: ['nature', 'Fern_1', 'gltf'], bush: ['nature', 'Bush_Common_Flowers', 'gltf'],
   meadow: ['nature', 'Grass_Common_Short', 'gltf'], wisps: ['nature', 'Grass_Wispy_Short', 'gltf'],
-  blossoms: ['nature', 'Flower_3_Group', 'gltf'], rockC: ['nature', 'Rock_Medium_3', 'gltf'],
+  blossoms: ['nature', 'Flower_3_Group', 'gltf'],
+  cliffSkirt: ['ruins','cliff-skirt'],
+  mesa: ['ruins','mesa'],
+  ...Object.fromEntries(Array.from({length:12},(_,i)=>[`bridge${i+1}`,['ruins',`bridge-${String(i+1).padStart(2,'0')}`]])),
 };
 
 export async function createView(canvas, onProgress) {
@@ -85,6 +87,10 @@ export async function createView(canvas, onProgress) {
   const rockMaterial = new THREE.MeshStandardMaterial({...rockSurface, color:'#999c7d', roughness:1, normalScale:new THREE.Vector2(.75,.75)});
   masonryMaterial.color.multiplyScalar(1.8);
   rockMaterial.color.multiplyScalar(1.35);
+  const pavingMaterial = new THREE.MeshStandardMaterial({...rockSurface,color:'#ded5b9',roughness:.95,normalScale:new THREE.Vector2(.4,.4),vertexColors:true});
+  pavingMaterial.color.multiplyScalar(1.5);
+  const foundationMaterial = masonryMaterial.clone(); foundationMaterial.color.set('#c6c1a6').multiplyScalar(1.35);
+  const mossMaterial = new THREE.MeshStandardMaterial({color:'#52642a',roughness:1,side:THREE.DoubleSide});
   const stoneKeys = new Set(['stone','ground','arch','wall','doorway','pillar','towerBase','towerMid','towerTop','bridge']);
   const surfaceKeys = new Set(['cliff']);
   const composer = new EffectComposer(renderer);
@@ -97,6 +103,16 @@ export async function createView(canvas, onProgress) {
     if (normalized.has(key)) return normalized.get(key);
     const gltf = models[key];
     const object = gltf.scene;
+    if (specifications[key][0] === 'ruins') {
+      object.traverse(child=>{if(child.isMesh){
+        child.castShadow = true;child.receiveShadow = true;
+        const name = child.material.name;
+        child.material = name === 'ruins_moss' ? mossMaterial : ['cliffSkirt','mesa'].includes(key) ? rockMaterial : name === 'ruins_stone' ? pavingMaterial : foundationMaterial;
+        child.userData.worldUV = name !== 'ruins_moss';
+        child.userData.uvScale = name === 'ruins_stone' ? .24 : .30;
+      }});
+      normalized.set(key,object);return object;
+    }
     object.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(object);
     const size = box.getSize(new THREE.Vector3());
@@ -149,10 +165,17 @@ export async function createView(canvas, onProgress) {
       if (mesh.userData.worldUV) {
         const pos = geometry.getAttribute('position'), normal = geometry.getAttribute('normal');
         const uv = new Float32Array(pos.count * 2);
-        for (let i = 0; i < pos.count; i++) {
-          const ax = Math.abs(normal.getX(i)), ay = Math.abs(normal.getY(i)), az = Math.abs(normal.getZ(i));
-          uv[i*2] = (ax > az && ax > ay ? pos.getZ(i) : pos.getX(i)) * .55;
-          uv[i*2+1] = (ay > ax && ay > az ? pos.getZ(i) : pos.getY(i)) * .55;
+        for (let triangle = 0; triangle < pos.count; triangle += 3) {
+          // All three corners must use the same projection; per-vertex axis
+          // switches stretched the textures into diagonal stripes on curved rocks.
+          let nx=0,ny=0,nz=0;
+          for(let j=0;j<3;j++){nx+=normal.getX(triangle+j);ny+=normal.getY(triangle+j);nz+=normal.getZ(triangle+j);}
+          const ax=Math.abs(nx),ay=Math.abs(ny),az=Math.abs(nz),scale=mesh.userData.uvScale || .30;
+          for(let j=0;j<3;j++) {
+            const i=triangle+j;
+            uv[i*2] = (ax > az && ax > ay ? pos.getZ(i) : pos.getX(i)) * scale;
+            uv[i*2+1] = (ay > ax && ay > az ? pos.getZ(i) : pos.getY(i)) * scale;
+          }
         }
         geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
       }
@@ -376,7 +399,10 @@ export async function createView(canvas, onProgress) {
     const vibration = moving && shake ? (Math.sin(frame * 2.6) * shake / TILE) : 0;
     camera.position.set(cameraX + vibration, cameraY + 1.45, 20);
     camera.lookAt(cameraX + vibration, cameraY, 0);
-    backdrop.position.set(cameraX + Math.sin(cameraX*.006)*2, cameraY + .1, -90);
+    // Face the camera so its pitch cannot expose the image's bottom edge.
+    backdrop.quaternion.copy(camera.quaternion);
+    backdrop.position.copy(camera.position).addScaledVector(camera.getWorldDirection(new THREE.Vector3()),110);
+    backdrop.position.x += Math.sin(cameraX*.006)*2;
     sun.position.set(cameraX + 8, cameraY + 16, 14);
     sun.target.position.set(cameraX, cameraY - 2, 0);
     composer.render(dt);
@@ -388,7 +414,7 @@ export async function createView(canvas, onProgress) {
     renderer.setSize(width, gameHeight, false);
     const aspect = width / gameHeight;
     const panoramaAspect = panorama.image.width / panorama.image.height;
-    const backdropHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*2*110*1.08*Math.max(1,aspect/panoramaAspect);
+    const backdropHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*2*110*1.15*Math.max(1,aspect/panoramaAspect);
     backdrop.scale.set(backdropHeight*panoramaAspect,backdropHeight,1);
     composer.setSize(width, gameHeight);
     camera.aspect = aspect; halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 20 * aspect;

@@ -1,13 +1,13 @@
-
+import { rememberPosition } from './render-motion.js';
 export function createGame(view) {
 
 /* ================= BALANCE（調整用の数値はここに集約） ================= */
 const B = {
   // 物理（1フレーム=1/60秒、単位はpx）
-  gravity: 0.23, fallGravity: 0.4, gravityRelease: 0.36, maxFall: 5.8,
+  gravity: 0.2, fallGravity: 0.26, apexGravity: 0.1, apexSpeed: 1.2, gravityRelease: 0.32, maxFall: 5.8,
   runBase: 1.25, runPerLv: 0.22,
   accelGround: 0.16, accelAir: 0.08, airPerLv: 0.055, friction: 0.2,
-  jumpBase: 4.9, jumpPerLv: 0.36, extraJumpV: 4.6,
+  jumpBase: 4.4, jumpPerLv: 0.36, extraJumpV: 4.2,
   coyote: 6, jumpBuffer: 7, floatFall: 1.1,
   // 射撃
   atkBase: 1.0, atkPerLv: 0.2,
@@ -358,6 +358,8 @@ function floatText(x, y, txt, c = '#fff') { texts.push({ x, y, txt, c, life: 40 
 
 /* ================= 更新 ================= */
 function update() {
+  if (P) rememberPosition(P);
+  for (const entities of [enemies, bullets, coinsArr, pickups, parts, texts]) for (const entity of entities) rememberPosition(entity);
   frame++;
   if (mode === 'play') updatePlayer();
   else if (mode === 'dying') { modeT++; P.vy = Math.min(P.vy + 0.3, 7); P.y += P.vy; if (modeT > 80) gameOver(); }
@@ -399,8 +401,9 @@ function updatePlayer() {
       burst(p.x + p.w / 2, p.y + p.h, 8, ['#ffffff', '#bfe3ff'], 1.4, 0, 16);
     }
   }
-  // 高さは保ちつつ上昇を穏やかに、落下は重く。離すと小ジャンプになる。
+  // 押し続けると頂点でふんわり滞空。離すと小ジャンプになる。
   let g = p.vy < 0 ? B.gravity : B.fallGravity;
+  if (!p.onGround && K.jump && !p.bouncing && Math.abs(p.vy) < B.apexSpeed) g = B.apexGravity;
   if (p.vy < 0 && !K.jump && !p.bouncing) g = B.gravity + B.gravityRelease;
   p.vy += g;
   const maxF = (ST.float && K.jump && p.vy > 0) ? B.floatFall : B.maxFall;
@@ -604,8 +607,8 @@ function updateFx() {
 }
 
 /* ================= 描画 ================= */
-function draw() {
-  view.render({ L, P, enemies, bullets, coins: coinsArr, pickups, parts, texts, goal, frame, mode, bossRef, shake });
+function draw(alpha = 1) {
+  view.render({ L, P, enemies, bullets, coins: coinsArr, pickups, parts, texts, goal, frame, mode, bossRef, shake, alpha });
   document.getElementById('pause').hidden = mode !== 'pause';
   const boss = document.getElementById('boss');
   boss.hidden = !(bossRef && bossRef.active && !bossRef.dead);
@@ -789,7 +792,7 @@ function loop(now) {
     else if (mode !== 'pause' && mode !== 'tree' && mode !== 'over') update();
     acc -= 1000 / 60;
   }
-  draw(); renderHUD();
+  draw(['pause', 'tree', 'over'].includes(mode) ? 1 : acc / (1000 / 60)); renderHUD();
   requestAnimationFrame(loop);
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play') togglePause(); });

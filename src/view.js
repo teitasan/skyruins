@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { samplePosition } from './render-motion.js';
 
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 const TILE = 16;
@@ -225,7 +226,7 @@ export async function createView(canvas, onProgress) {
     }
   }
   function render(state) {
-    const { L, P, enemies, bullets, coins, pickups, parts, texts, goal, frame, mode, shake } = state;
+    const { L, P, enemies, bullets, coins, pickups, parts, texts, goal, frame, mode, shake, alpha = 1 } = state;
     if (!L) return;
     const now = performance.now();
     const dt = Math.min(.05, (now - lastTime) / 1000); lastTime = now;
@@ -233,7 +234,8 @@ export async function createView(canvas, onProgress) {
     if (L !== level) buildLevel(L);
     hero.group.visible = Boolean(P) && !(P.inv > 0 && Math.floor(frame / 3) % 2);
     if (P) {
-      hero.group.position.set((P.x + P.w / 2) / TILE, -(P.y + P.h) / TILE, 0);
+      const pos = samplePosition(P, alpha);
+      hero.group.position.set((pos.x + P.w / 2) / TILE, -(pos.y + P.h) / TILE, 0);
       if (previousPlayer !== P) { wasGrounded = P.onGround; landingUntil = 0; hero.group.rotation.y = P.face * (Math.PI / 2 - .22); }
       if (moving) {
         hero.group.rotation.y = THREE.MathUtils.damp(hero.group.rotation.y, P.face * (Math.PI / 2 - .22), 18, dt);
@@ -264,7 +266,8 @@ export async function createView(canvas, onProgress) {
         a = actor(e.type, [big ? 2.3 : .76, big ? 1.9 : .67, big ? 1.65 : .58]);
         a.hp = hpBar(a.group); a.animate('walk', .75); scene.add(a.group); creatures.set(e, a);
       }
-      a.group.position.set((e.x + e.w / 2) / TILE, -(e.y + e.h) / TILE, 0);
+      const pos = samplePosition(e, alpha);
+      a.group.position.set((pos.x + e.w / 2) / TILE, -(pos.y + e.h) / TILE, 0);
       a.group.rotation.y = e.dir * (Math.PI / 2 - .38);
       a.group.visible = !(e.flash > 0 && frame % 4 < 2);
       a.mixer.update(moving ? dt : 0);
@@ -281,13 +284,15 @@ export async function createView(canvas, onProgress) {
       let mesh = items.get(c);
       const coin = coins.includes(c);
       if (!mesh) { mesh = model(coin ? 'coin' : 'heart').clone(true); mesh.scale.setScalar(coin ? .4 : .43); scene.add(mesh); items.set(c, mesh); }
-      mesh.position.set((c.x + 4) / TILE, -(c.y + 5) / TILE + .08 * Math.sin(frame * .06 + (c.ph || 0)), 0);
-      mesh.rotation.y = frame * .03;
+      const pos = samplePosition(c, alpha), visualFrame = frame + alpha;
+      mesh.position.set((pos.x + 4) / TILE, -(pos.y + 5) / TILE + .08 * Math.sin(visualFrame * .06 + (c.ph || 0)), 0);
+      mesh.rotation.y = visualFrame * .03;
     }
     const liveBolts = new Set(bullets.filter(b => b.life > 0)); sweep(bolts, liveBolts);
     for (const b of liveBolts) {
       let mesh = bolts.get(b); if (!mesh) {mesh = makeBolt(); bolts.set(b, mesh);}
-      mesh.position.set((b.x + b.w / 2) / TILE, -(b.y + b.h / 2) / TILE, .12);
+      const pos = samplePosition(b, alpha);
+      mesh.position.set((pos.x + b.w / 2) / TILE, -(pos.y + b.h / 2) / TILE, .12);
       mesh.rotation.z = Math.atan2(-b.vy, b.vx);
     }
     const liveFx = new Set(parts); sweep(fx, liveFx);
@@ -298,14 +303,16 @@ export async function createView(canvas, onProgress) {
         if (!material) {material = new THREE.MeshBasicMaterial({color:p.c}); particleMaterials.set(p.c, material);}
         mesh = new THREE.Mesh(particleGeometry, material); scene.add(mesh); fx.set(p, mesh);
       }
-      mesh.position.set(p.x / TILE, -p.y / TILE, .2);
+      const pos = samplePosition(p, alpha);
+      mesh.position.set(pos.x / TILE, -pos.y / TILE, .2);
       mesh.scale.setScalar(p.s * Math.max(.1, p.life / p.max));
     }
     const liveLabels = new Set(texts); sweep(floatingLabels, liveLabels, sprite => sprite.material.dispose());
     for (const t of liveLabels) {
       let sprite = floatingLabels.get(t);
       if (!sprite) {sprite = textSprite(t.txt, t.c); floatingLabels.set(t, sprite);}
-      sprite.position.set(t.x / TILE, -t.y / TILE + .3, .3);
+      const pos = samplePosition(t, alpha);
+      sprite.position.set(pos.x / TILE, -pos.y / TILE + .3, .3);
       sprite.material.opacity = Math.min(1, t.life / 15);
     }
     if (goal) {

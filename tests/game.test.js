@@ -1,8 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createGame } from '../src/game.js';
+import { samplePosition } from '../src/render-motion.js';
 
-function setup(saved = null) {
+function setup(saved = null, render = () => {}) {
   const elements = new Map();
   const makeElement = () => ({ style: { setProperty() {} }, classList: {add(){},remove(){}}, hidden:false,
     innerHTML:'', textContent:'', parentElement:{clientWidth:600}, querySelector(){return makeElement();},
@@ -19,7 +20,7 @@ function setup(saved = null) {
   globalThis.localStorage = {getItem:k=>data.get(k)??null,setItem:(k,v)=>data.set(k,v)};
   globalThis.addEventListener = (type, fn) => {if (!events.has(type)) events.set(type,[]);events.get(type).push(fn);};
   globalThis.requestAnimationFrame = fn => {frameCallback=fn;};
-  const game = createGame({resize(){},render(){}});
+  const game = createGame({resize(){},render});
   return {game, elements, data, tick:t=>frameCallback(t), input:(code,type='keydown')=>{
     for(const fn of events.get(type)||[])fn({code,repeat:false,preventDefault(){}});
   }};
@@ -57,17 +58,42 @@ test('移動は緩やかに加速し、入力を離すと短い距離で止ま�
   assert.equal(game.P.vx,0);assert.ok(game.P.x-released<4);
 });
 
-test('大ジャンプは約3マスの高さを保ち、落下時間が上昇時間より短い', () => {
+test('押し続けたジャンプは約3マスの高さで、頂点にふんわり滞空する', () => {
   const {game}=setup();game.beginFrom({stage:1,coins:0,skills:{}});game.step(3);
   const ground=game.P.y;game.setKey('jump',true);
-  let top=ground,apex=0,landed=0;
-  for(let i=1;i<=60;i++){
+  let top=ground,apex=0,landed=0;const heights=[];
+  for(let i=1;i<=80;i++){
     game.step(1);
+    heights.push(game.P.y);
     if(game.P.y<top){top=game.P.y;apex=i;}
     if(game.P.onGround){landed=i;break;}
   }
   assert.ok(ground-top>=48 && ground-top<=54);
-  assert.ok(apex>=20);assert.ok(landed>apex && landed-apex<apex);
+  assert.ok(apex>=24);assert.ok(landed>=48 && landed<=60);
+  assert.ok(heights.filter(y=>y-top<=4).length>=16, '頂点の前後を約0.27秒以上かけて通る');
+});
+
+test('120Hzと144Hzの描画では物理更新の間も等間隔に移動する', () => {
+  for(const hz of [120,144]) {
+    const positions=[];
+    const {game,tick}=setup(null,state=>{if(state.P)positions.push(samplePosition(state.P,state.alpha).x);});
+    game.beginFrom({stage:1,coins:0,skills:{}});game.step(3);game.setKey('right',true);
+    const start=performance.now();
+    for(let i=1;i<=hz;i++) tick(start+i*1000/hz);
+    const deltas=positions.slice(30).map((x,i,a)=>i?x-a[i-1]:null).filter(x=>x!==null);
+    assert.ok(deltas.length>50);
+    for(const dx of deltas) assert.ok(Math.abs(dx-75/hz)<1e-6, `描画${hz}Hzで停止と飛びが交互に出ない: ${dx}`);
+    game.togglePause();const paused=game.P.x;tick(start+1100);
+    assert.equal(positions.at(-1),paused);
+  }
+});
+
+test('落下後の復帰位置を補間してステージ上を横切らせない', () => {
+  const {game}=setup();game.beginFrom({stage:1,coins:0,skills:{}});game.step(3);
+  Object.assign(game.P,{x:160,y:350,vx:0,vy:0,inv:0});
+  game.step(1);
+  assert.equal(game.mode,'play');assert.ok(game.P.y<272);
+  assert.deepEqual(samplePosition(game.P,.5),{x:game.P.x,y:game.P.y});
 });
 
 test('速度を落としても基本ジャンプで3マスの穴と中継足場を渡れる', () => {
@@ -81,16 +107,16 @@ test('速度を落としても基本ジャンプで3マスの穴と中継足場�
     game.setKey('right',true);game.setKey('jump',true);
   }
   prepare([[15,'#####...########'],[16,'#####...########']]);
-  game.step(40);
+  game.step(60);
   assert.ok(game.P.x+game.P.w>=128);assert.equal(game.P.onGround,true);
   assert.equal(game.P.y+game.P.h,240);
   prepare([[13,'.......-----.......'],[15,'#####........#####'],[16,'#####........#####']]);
-  game.step(31);
+  game.step(60);
   assert.equal(game.P.onGround,true);assert.equal(game.P.y+game.P.h,208);
   game.setKey('jump',false);
   for(let i=0;i<60 && game.P.x<190;i++) game.step(1);
   assert.equal(game.P.onGround,true);
-  game.setKey('jump',true);game.step(50);
+  game.setKey('jump',true);game.step(65);
   assert.ok(game.P.x+game.P.w>=208);assert.equal(game.P.onGround,true);
 });
 

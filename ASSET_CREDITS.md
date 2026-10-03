@@ -23,6 +23,7 @@ Kenney の取得アーカイブ:
 モデル自体は再制作せず、配置・サイズ・アニメーションの切り替えでゲームに組み込んでいます。
 動きの重さの調整にも、収録済みの KayKit `Walking_A` / `Jump_Idle` / `Jump_Land` を再利用しています。
 再生速度・切り替えは Three.js の既存 AnimationAction API（https://threejs.org/docs/pages/AnimationAction.html）を使用し、新しいアニメーション素材やライブラリは追加していません。
+描画の位置補間には、同じMITライセンスの Three.js `MathUtils.lerp` を再利用しています。固定物理更新と描画の間を補間する方法は Glenn Fiedler の解説 https://gafferongames.com/post/fix_your_timestep/ を参照し、記事のコードは転載していません。既存の衝突処理を保つため、物理エンジンの追加は行っていません。
 
 ## 調査と選択理由
 

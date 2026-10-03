@@ -1,0 +1,167 @@
+[
+  {
+    "path": "assets/castle/LICENSE.txt",
+    "sha256": "b83a5e33e7a037eeae41791f52caa6879de7870c567ac5c9a2b9b9e9e4c02e1f",
+    "bytes": 684
+  },
+  {
+    "path": "assets/castle/Textures/colormap.png",
+    "sha256": "66fd49be148f32e88f6c8cace67120250d1943a7856601158ad0ff24651db0b0",
+    "bytes": 7529
+  },
+  {
+    "path": "assets/castle/bridge-straight-pillar.glb",
+    "sha256": "c85521e13dcf55ba8d015a04bbdbd0f063c31d01befb69a7c9fb097d128f195b",
+    "bytes": 14344
+  },
+  {
+    "path": "assets/castle/rocks-large.glb",
+    "sha256": "7ea1ee769eb063b192c3c3744cd32a11616320f7ca491fbe23289552f6655595",
+    "bytes": 16204
+  },
+  {
+    "path": "assets/castle/tower-square-arch.glb",
+    "sha256": "90ccb41a792ea3c5b8c98a3f18b710b52ebfdcd1e389024168c5ac6e591dd564",
+    "bytes": 29724
+  },
+  {
+    "path": "assets/castle/tower-square-base.glb",
+    "sha256": "996887e98957eeea2ba7b5d14f0d17877c91e4e99e1c5b8ee57d87b7f7c9d5e8",
+    "bytes": 4456
+  },
+  {
+    "path": "assets/castle/tower-square-mid-windows.glb",
+    "sha256": "68c186f978135ba77969cdbee502a1c0d9d8f40bd01e8aa33b7cc6859a2ba766",
+    "bytes": 30852
+  },
+  {
+    "path": "assets/castle/tower-square-top.glb",
+    "sha256": "5e98cdf2bf4d885edc3fa514719f80d63872e11c54ee629c11859223dad8489c",
+    "bytes": 13276
+  },
+  {
+    "path": "assets/castle/tree-small.glb",
+    "sha256": "ad5b2d7225241eb0599dbc7f1a9f9c39915be56ccccf88ad091bc9c1b4334034",
+    "bytes": 15816
+  },
+  {
+    "path": "assets/castle/wall-doorway.glb",
+    "sha256": "8daf5cccceace888d51d74b0e0254e192004faf926e07f1b28e94191879af3a6",
+    "bytes": 37560
+  },
+  {
+    "path": "assets/castle/wall-half.glb",
+    "sha256": "4f0baca90eb52d96717aaabf36db98f1f2b554876f44da533b57dd92b6f67965",
+    "bytes": 12132
+  },
+  {
+    "path": "assets/castle/wall-pillar.glb",
+    "sha256": "22d359abfaa3cf3dc5a2fece09a108024a07a4e263b21a4a0689da0e630699ed",
+    "bytes": 18156
+  },
+  {
+    "path": "assets/kaykit/LICENSE.txt",
+    "sha256": "50e3fb7858f1351436923f0fd4bb4ea9198db1248bb2325b46a66af94aac517e",
+    "bytes": 892
+  },
+  {
+    "path": "assets/kaykit/Rogue.glb",
+    "sha256": "e825437cd4d2ee9c1960b517a74a69101e33eb409ae7fa8cedc7134a998fbb7d",
+    "bytes": 3616284
+  },
+  {
+    "path": "assets/kaykit/rogue_texture.png",
+    "sha256": "a4032e877c3b91939f5cdbb630349c1998fdbc3211bbd587c111125500fe4cc5",
+    "bytes": 16670
+  },
+  {
+    "path": "assets/platformer/LICENSE.txt",
+    "sha256": "b8cccfd97148d929e3df4b0fd05bdadebf9b671cc98c968dae9e1f5e5479cf6a",
+    "bytes": 674
+  },
+  {
+    "path": "assets/platformer/Textures/colormap.png",
+    "sha256": "439dfcac935cfd75dc16f28333a4c8284fffcc4b24f857c61cfb4c8a964a15bd",
+    "bytes": 11140
+  },
+  {
+    "path": "assets/platformer/block-grass.glb",
+    "sha256": "8cd2f9ec083b2b7cfe89d95c53ef8adf369d1e5e6adf125f063122d4998c336f",
+    "bytes": 10192
+  },
+  {
+    "path": "assets/platformer/brick.glb",
+    "sha256": "b1638210ac5584f5d050654d3635b39834542b4121f6095f75b98e28745a23b3",
+    "bytes": 22412
+  },
+  {
+    "path": "assets/platformer/character-oobi.glb",
+    "sha256": "42cb1889e1ef6404f3d6b5d5ac6b79c9d9a60bc54fd82df83c63c664705873e4",
+    "bytes": 236392
+  },
+  {
+    "path": "assets/platformer/character-oodi.glb",
+    "sha256": "3790919a738ed907ebb57dd474174043af843f9571d1856042715ec3ecdb04eb",
+    "bytes": 202604
+  },
+  {
+    "path": "assets/platformer/character-ooli.glb",
+    "sha256": "fa500369104ed72b784f7acecb3cece397cb9198d3530606e8833ae84a639ba5",
+    "bytes": 206704
+  },
+  {
+    "path": "assets/platformer/character-oozi.glb",
+    "sha256": "a33d91691313d46da6fbabb4b6d9cd9f8feb136c6bcac9bb03a4a56a91c33f84",
+    "bytes": 219072
+  },
+  {
+    "path": "assets/platformer/coin-gold.glb",
+    "sha256": "cf2179e57721b943d88283d38678c4b1b8422e9a4dd44f631acfb35007c223a8",
+    "bytes": 10608
+  },
+  {
+    "path": "assets/platformer/flag.glb",
+    "sha256": "41dc8355080ed9f73adeefa7befaec44b6956ba1353c23bc9ff73d97a53fc143",
+    "bytes": 11396
+  },
+  {
+    "path": "assets/platformer/flowers.glb",
+    "sha256": "c4d459bf014a534a79a6763e59d9c548902600fe0e0e025654bd58a979139be6",
+    "bytes": 25928
+  },
+  {
+    "path": "assets/platformer/grass.glb",
+    "sha256": "601ae2a507f4bccbe93c08433479c07ccaea0fcd8a3769264505a9cfeec4baa5",
+    "bytes": 8964
+  },
+  {
+    "path": "assets/platformer/heart.glb",
+    "sha256": "aa868143aad26fe325f884cd489e2b47a25752f98902416320ebef6702057a57",
+    "bytes": 5828
+  },
+  {
+    "path": "assets/platformer/ladder.glb",
+    "sha256": "64620d7fc0fb770bda241a1aa7f64c583c2ee10a31cf0b81231e8ac97e34305d",
+    "bytes": 7228
+  },
+  {
+    "path": "assets/platformer/platform.glb",
+    "sha256": "59edd84481a20b91587dfb35afef7b3e5b2f20081e6af4fc641a51655d7db2c8",
+    "bytes": 9968
+  },
+  {
+    "path": "assets/platformer/stones.glb",
+    "sha256": "0468bd937ffe5a7bcaa4cddb08e4660533df4c2079e885da2c3d32df07ff77d6",
+    "bytes": 13752
+  },
+  {
+    "path": "assets/platformer/trap-spikes.glb",
+    "sha256": "ca34a7b762154f0c43992f01a4e3f6f800d42f6451e954c07fea4d7a72f17b1b",
+    "bytes": 21540
+  },
+  {
+    "path": "assets/platformer/tree.glb",
+    "sha256": "632eb83a4359afd110594ea6f69db4db0c9512c79ae2c88741cf68e527253e41",
+    "bytes": 42680
+  }
+]

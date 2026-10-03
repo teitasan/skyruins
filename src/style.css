@@ -1,0 +1,36 @@
+:root { color-scheme: dark; }
+body { background: #101f2e; }
+#wrap { box-shadow: none; }
+#cv { image-rendering: auto; }
+.title-card h1 { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; letter-spacing: .08em; font-size: clamp(30px,6vw,70px); text-shadow: 0 3px 12px #0a192a; }
+#ov-title { background: linear-gradient(0deg,rgba(4,18,31,.76),rgba(4,18,31,.2) 75%); }
+.title-card { padding: 30px 20px; }
+.title-card .subtitle { font-size: clamp(12px,2vw,17px); letter-spacing: .15em; }
+.btn { border-radius: 6px; }
+.btn.primary { background: #e9b65e; color: #172330; box-shadow: 0 3px 0 #946222; }
+.btn.primary:hover { background: #ffd787; }
+#loading { margin-top: 20px; color: #d1e3e9; font-size: 12px; min-height: 1.5em; }
+.keys { font-size: 12px; gap: 12px; max-width: 620px; margin: 20px auto 0; }
+#hearts { top: 16px; left: 18px; gap: 3px; }
+#hearts svg { width: clamp(18px,3vw,30px); height: clamp(17px,2.6vw,26px); }
+.pill { top: 14px; font-size: 14px !important; padding: 6px 12px; background: rgba(8,20,31,.7); border: 1px solid #ffffff24; }
+#coins { right: 18px; }
+#stagelabel { letter-spacing: .1em; font-family: inherit; }
+#touch { padding: 0 16px 12px; height: 35%; }
+.tb { width: 54px; height: 54px; font-size: 18px; backdrop-filter: blur(4px); }
+.tpad { gap: 8px; }
+#pause { position: absolute; inset: 0; background: #07162488; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; pointer-events: none; }
+#pause strong { font-size: 30px; letter-spacing: .2em; }
+#pause span { font-size: 12px; }
+#pause[hidden], #boss[hidden] { display: none; }
+#boss { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: min(280px,60%); font-size: 12px; text-align: center; color: #fff1c4; }
+#boss > div { margin-top: 5px; height: 6px; border-radius: 8px; background: #332a30; overflow: hidden; }
+#boss i { display: block; height: 100%; background: #ff735c; }
+@media (max-width: 600px) {
+  .keys { gap: 8px; font-size: 11px; }
+  .title-card .subtitle { margin-bottom: 20px; }
+  #stagelabel { font-size: 10px !important; }
+  #hearts { left: 8px; top: 12px; }
+  #coins { right: 8px; top: 10px; font-size: 12px !important; }
+  .tb { width: 42px; height: 42px; }
+}

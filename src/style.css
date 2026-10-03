@@ -1,8 +1,9 @@
 :root { color-scheme: dark; }
-body { background: #101f2e; }
+body { background: #0e181b; }
 #wrap { box-shadow: none; }
+#wrap::after { content:''; position:absolute; inset:0; pointer-events:none; box-shadow:inset 0 0 95px #13232040; }
 #cv { image-rendering: auto; }
-.title-card h1 { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; letter-spacing: .08em; font-size: clamp(30px,6vw,70px); text-shadow: 0 3px 12px #0a192a; }
+.title-card h1 { font-family: 'Zen Kaku Gothic New', sans-serif; font-weight: 900; letter-spacing: .14em; font-size: clamp(30px,6vw,70px); color:#fff0cf; text-shadow: 0 3px 20px #152724, 0 1px 2px #101915; }
 #ov-title { background: linear-gradient(0deg,rgba(4,18,31,.76),rgba(4,18,31,.2) 75%); }
 .title-card { padding: 30px 20px; }
 .title-card .subtitle { font-size: clamp(12px,2vw,17px); letter-spacing: .15em; }
@@ -12,8 +13,8 @@ body { background: #101f2e; }
 #loading { margin-top: 20px; color: #d1e3e9; font-size: 12px; min-height: 1.5em; }
 .keys { font-size: 12px; gap: 12px; max-width: 620px; margin: 20px auto 0; }
 #hearts { top: 16px; left: 18px; gap: 3px; }
-#hearts svg { width: clamp(18px,3vw,30px); height: clamp(17px,2.6vw,26px); }
-.pill { top: 14px; font-size: 14px !important; padding: 6px 12px; background: rgba(8,20,31,.7); border: 1px solid #ffffff24; }
+#hearts svg { width: clamp(21px,3vw,33px); height: clamp(21px,3vw,33px); shape-rendering:auto; filter:drop-shadow(0 2px 3px #10241c88); }
+.pill { top: 14px; font-size: 14px !important; padding: 7px 13px; background: rgba(12,28,29,.74); border: 1px solid #e7d6a63d; color:#f7ead0; box-shadow:0 3px 12px #0c202838; backdrop-filter:blur(8px); }
 #coins { right: 18px; }
 #stagelabel { letter-spacing: .1em; font-family: inherit; }
 #touch { padding: 0 16px 12px; height: 35%; }
@@ -26,6 +27,9 @@ body { background: #101f2e; }
 #boss { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); width: min(280px,60%); font-size: 12px; text-align: center; color: #fff1c4; }
 #boss > div { margin-top: 5px; height: 6px; border-radius: 8px; background: #332a30; overflow: hidden; }
 #boss i { display: block; height: 100%; background: #ff735c; }
+.tree { background:linear-gradient(145deg,#101d20f7,#0d171df7); border-color:#a99c694f; box-shadow:0 24px 90px #030b10b3; }
+.tree-head { border-color:#b5a57533; }
+.detail { background:linear-gradient(160deg,#26343588,#11232966); border-color:#b2ac7e38; }
 @media (max-width: 600px) {
   .keys { gap: 8px; font-size: 11px; }
   .title-card .subtitle { margin-bottom: 20px; }

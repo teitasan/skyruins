@@ -617,17 +617,9 @@ function draw(alpha = 1) {
 
 /* ================= HUD ================= */
 let hudDirty = true;
-const HEART_PX = ['.##.##.', '#######', '#######', '.#####.', '..###..', '...#...'];
+// Bootstrap Icons heart-fill (MIT), recolored for full/half/empty HP.
 function heartSVG(fill) {
-  let s = '<svg viewBox="-0.5 -0.5 8 7">';
-  HEART_PX.forEach((row, y) => [...row].forEach((c, x) => {
-    if (c !== '#') return;
-    const on = fill === 2 || (fill === 1 && x < 3.5);
-    const hi = on && ((y === 1 && x === 1) || (y === 1 && x === 2 && fill));
-    s += `<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${hi ? '#ffc0c4' : on ? '#e8323a' : '#3a2530'}"/>`;
-  }));
-  s += '<path d="M0.5 -0.5h2v1h1v-1h2v1h1v3h-1v1h-1v1h-1v1h-1v-1h-1v-1h-1v-1h-1v-3h1z" fill="none" stroke="#14101a" stroke-width=".6"/></svg>';
-  return s;
+  return `<svg viewBox="-1 -1 18 18" aria-hidden="true"><defs><linearGradient id="health-half"><stop offset="50%" stop-color="#ed6456"/><stop offset="50%" stop-color="#3d3533"/></linearGradient></defs><path d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314" fill="${fill === 2 ? '#ed6456' : fill === 1 ? 'url(#health-half)' : '#3d3533'}" stroke="#282c27" stroke-width="1.25" stroke-linejoin="round"/>${fill ? '<path d="M3 4Q4 2.7 5.3 3" fill="none" stroke="#ffe0ba" stroke-width=".9" stroke-linecap="round"/>' : ''}</svg>`;
 }
 function renderHUD() {
   if (!hudDirty || !P) return;

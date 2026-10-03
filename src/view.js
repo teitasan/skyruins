@@ -3,38 +3,44 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkeleton } from 'three/addons/utils/SkeletonUtils.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { samplePosition } from './render-motion.js';
+import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { buildScenery } from './scenery.js';
 
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 const TILE = 16;
 const specifications = {
   hero: ['kaykit', 'Rogue'],
-  ground: ['platformer', 'block-grass'], stone: ['platformer', 'brick'],
-  platform: ['platformer', 'platform'], coin: ['platformer', 'coin-gold'], heart: ['platformer', 'heart'],
-  grass: ['platformer', 'grass'], flowers: ['platformer', 'flowers'], tree: ['platformer', 'tree'],
-  rocks: ['platformer', 'stones'], spikes: ['platformer', 'trap-spikes'], flag: ['platformer', 'flag'], ladder: ['platformer', 'ladder'],
+  stone: ['platformer', 'brick'], coin: ['platformer', 'coin-gold'], heart: ['platformer', 'heart'],
+  spikes: ['platformer', 'trap-spikes'], flag: ['platformer', 'flag'], ladder: ['platformer', 'ladder'],
   s: ['platformer', 'character-oobi'], b: ['platformer', 'character-ooli'],
   f: ['platformer', 'character-oodi'], k: ['platformer', 'character-oozi'], K: ['platformer', 'character-oobi'],
-  arch: ['castle', 'tower-square-arch'], wall: ['castle', 'wall-half'], doorway: ['castle', 'wall-doorway'],
-  pillar: ['castle', 'wall-pillar'], towerBase: ['castle', 'tower-square-base'],
-  towerMid: ['castle', 'tower-square-mid-windows'], towerTop: ['castle', 'tower-square-top'],
-  cliff: ['castle', 'rocks-large'], bridge: ['castle', 'bridge-straight-pillar'], smallTree: ['castle', 'tree-small'],
+  arch: ['castle', 'tower-square-arch'], pillar: ['castle', 'wall-pillar'],
+  cliff: ['nature', 'Rock_Medium_1', 'gltf'],
+  broadTree: ['nature', 'CommonTree_1', 'gltf'],
+  fern: ['nature', 'Fern_1', 'gltf'], bush: ['nature', 'Bush_Common_Flowers', 'gltf'],
+  meadow: ['nature', 'Grass_Common_Short', 'gltf'], wisps: ['nature', 'Grass_Wispy_Short', 'gltf'],
+  blossoms: ['nature', 'Flower_3_Group', 'gltf'], rockC: ['nature', 'Rock_Medium_3', 'gltf'],
 };
 
 export async function createView(canvas, onProgress) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.35;
+  renderer.toneMappingExposure = .95;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#9acbe9');
-  scene.fog = new THREE.Fog('#a9cbd7', 30, 92);
-  const camera = new THREE.PerspectiveCamera(19.3, 16 / 9, .1, 140);
+  scene.background = new THREE.Color('#b5cdd7');
+  scene.fog = new THREE.Fog('#b5cdd7', 37, 110);
+  const camera = new THREE.PerspectiveCamera(24.5, 16 / 9, .1, 180);
   let halfWidth = 6;
-  scene.add(new THREE.HemisphereLight('#c6e7ff', '#596140', 2.4));
-  const sun = new THREE.DirectionalLight('#ffe9b7', 3.6);
+  scene.add(new THREE.HemisphereLight('#d6e7ef', '#64704b', 1.25));
+  const sun = new THREE.DirectionalLight('#ffe1ac', 3.0);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.left = -18; sun.shadow.camera.right = 18;
@@ -42,16 +48,49 @@ export async function createView(canvas, onProgress) {
   sun.shadow.camera.near = .1; sun.shadow.camera.far = 70;
   sun.shadow.bias = -.0005; sun.shadow.normalBias = .025;
   scene.add(sun, sun.target);
-  const rim = new THREE.DirectionalLight('#a7daff', 1.4);
+  const rim = new THREE.DirectionalLight('#b2dcff', 1.15);
   rim.position.set(-15, -4, -10); scene.add(rim);
 
   const loader = new GLTFLoader();
   const models = {};
   let loaded = 0;
-  await Promise.all(Object.entries(specifications).map(async ([key, [pack, name]]) => {
-    models[key] = await loader.loadAsync(`${assetRoot}${pack}/${name}.glb`);
+  await Promise.all(Object.entries(specifications).map(async ([key, [pack, name, extension = 'glb']]) => {
+    models[key] = await loader.loadAsync(`${assetRoot}${pack}/${name}.${extension}`);
     onProgress(`遺跡を準備しています… ${++loaded} / ${Object.keys(specifications).length}`);
   }));
+  const textureLoader = new THREE.TextureLoader();
+  const loadSurface = async name => {
+    const [map, normalMap, roughnessMap] = await Promise.all(['diff','nor_gl','rough'].map(suffix => textureLoader.loadAsync(`${assetRoot}surfaces/${name}_${suffix}_1k.jpg`)));
+    map.colorSpace = THREE.SRGBColorSpace;
+    for (const texture of [map, normalMap, roughnessMap]) {
+      texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    }
+    return {map, normalMap, roughnessMap};
+  };
+  const [masonry, rockSurface, sky] = await Promise.all([
+    loadSurface('mossy_stone_wall'), loadSurface('rock_pitted_mossy'),
+    new HDRLoader().loadAsync(`${assetRoot}surfaces/kloofendal_48d_partly_cloudy_puresky_1k.hdr`),
+  ]);
+  sky.mapping = THREE.EquirectangularReflectionMapping;
+  const panorama = await textureLoader.loadAsync(`${assetRoot}scenery/skyruins-valley-v1.png`);
+  panorama.colorSpace = THREE.SRGBColorSpace;
+  const backdrop = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({map:panorama, fog:false, toneMapped:false, depthWrite:false}));
+  backdrop.renderOrder = -10; scene.add(backdrop);
+  scene.background = new THREE.Color('#b6d8eb');
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const environment = pmrem.fromEquirectangular(sky);
+  scene.environment = environment.texture; scene.environmentIntensity = .5; pmrem.dispose();
+  const masonryMaterial = new THREE.MeshStandardMaterial({...masonry, color:'#f2e4c7', roughness:1, normalScale:new THREE.Vector2(.65,.65)});
+  const rockMaterial = new THREE.MeshStandardMaterial({...rockSurface, color:'#999c7d', roughness:1, normalScale:new THREE.Vector2(.75,.75)});
+  masonryMaterial.color.multiplyScalar(1.8);
+  rockMaterial.color.multiplyScalar(1.35);
+  const stoneKeys = new Set(['stone','ground','arch','wall','doorway','pillar','towerBase','towerMid','towerTop','bridge']);
+  const surfaceKeys = new Set(['cliff']);
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(1,1), .18, .5, 1.2));
+  composer.addPass(new OutputPass());
   const normalized = new Map();
   const modelSizes = new Map();
   function model(key) {
@@ -69,6 +108,15 @@ export async function createView(canvas, onProgress) {
     object.position.sub(new THREE.Vector3(center.x, box.min.y, center.z));
     offset.add(object); group.add(offset);
     object.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
+    if (specifications[key][0] === 'nature') object.traverse(child => {
+      if (!child.isMesh) return;
+      child.material = child.material.clone();
+      child.material.roughness = 1;
+      if (child.material.transparent || child.material.alphaTest > 0) {
+        child.material.alphaTest = .45; child.material.transparent = false; child.material.side = THREE.DoubleSide;
+      }
+    });
+    if (key === 'ladder') object.traverse(child => { if (child.isMesh) {child.material = child.material.clone(); child.material.color.set('#a48768');} });
     normalized.set(key, group);
     return group;
   }
@@ -81,6 +129,11 @@ export async function createView(canvas, onProgress) {
     instance.position.set(...position);
     instance.scale.set(...dimensions);
     instance.rotation.y = angle;
+    if (stoneKeys.has(key) || surfaceKeys.has(key)) instance.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      mesh.material = stoneKeys.has(key) ? masonryMaterial : rockMaterial;
+      mesh.userData.worldUV = true;
+    });
     world.add(instance);
     return instance;
   }
@@ -93,6 +146,16 @@ export async function createView(canvas, onProgress) {
       const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       const geometry = mesh.geometry.index ? mesh.geometry.toNonIndexed() : mesh.geometry.clone();
       geometry.applyMatrix4(mesh.matrixWorld);
+      if (mesh.userData.worldUV) {
+        const pos = geometry.getAttribute('position'), normal = geometry.getAttribute('normal');
+        const uv = new Float32Array(pos.count * 2);
+        for (let i = 0; i < pos.count; i++) {
+          const ax = Math.abs(normal.getX(i)), ay = Math.abs(normal.getY(i)), az = Math.abs(normal.getZ(i));
+          uv[i*2] = (ax > az && ax > ay ? pos.getZ(i) : pos.getX(i)) * .55;
+          uv[i*2+1] = (ay > ax && ay > az ? pos.getZ(i) : pos.getY(i)) * .55;
+        }
+        geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+      }
       const groups = geometry.groups.length ? geometry.groups : [{ start: 0, count: geometry.attributes.position.count, materialIndex: 0 }];
       for (const group of groups) {
         const material = materials[group.materialIndex];
@@ -104,6 +167,15 @@ export async function createView(canvas, onProgress) {
         }
         if (!part.getAttribute('uv')) part.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(group.count * 2), 2));
         if (!part.getAttribute('normal')) part.computeVertexNormals();
+        // Quaternius foliage uses vertex-painted shading. Keep it when batching.
+        const sourceColor = geometry.getAttribute('color');
+        const colors = new Float32Array(group.count * 3);
+        for(let i=0;i<group.count;i++) {
+          colors[i*3] = sourceColor ? sourceColor.getX(group.start+i) : 1;
+          colors[i*3+1] = sourceColor ? sourceColor.getY(group.start+i) : 1;
+          colors[i*3+2] = sourceColor ? sourceColor.getZ(group.start+i) : 1;
+        }
+        part.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         let bucket = buckets.get(material.uuid);
         if (!bucket) { bucket = { material, geometries: [] }; buckets.set(material.uuid, bucket); }
         bucket.geometries.push(part);
@@ -123,37 +195,7 @@ export async function createView(canvas, onProgress) {
     if (world) scene.remove(world);
     mergedGeometries.splice(0).forEach(g => g.dispose());
     world = new THREE.Group(); scene.add(world); level = L;
-    for (let y = 0; y < L.grid.length; y++) for (let x = 0; x < L.w; x++) {
-      const t = L.grid[y][x], above = L.grid[y - 1]?.[x];
-      const exposed = !['#', 'B'].includes(above);
-      if (t === '#' || t === 'B') {
-        staticObject(t === '#' && exposed ? 'ground' : 'stone', [x + .5, -y - 1, 0], [1, 1, 1.65]);
-        if (exposed && t === '#' && x % 3 === 0) staticObject('grass', [x + .45, -y, -.55], [.8, .32, .7]);
-        if (exposed && t === '#' && x % 11 === 4) staticObject('flowers', [x + .5, -y, .55], [.48, .24, .3]);
-      } else if (t === '-') {
-        staticObject('platform', [x + .5, -y - .2, 0], [1, .2, 1.5]);
-        if (x % 4 === 0) staticObject('pillar', [x + .5, -y - 4, -.45], [.4, 3.8, .6]);
-      } else if (t === '^') staticObject('spikes', [x + .5, -y - 1, 0], [1, .48, 1]);
-      if (t === '#' && exposed && x % 17 === 5) staticObject('rocks', [x + .5, -y, -.5], [.7, .45, .65]);
-    }
-    // A continuous path stays readable on z=0. Scenery occupies separate depth layers.
-    for (let x = -12; x < L.w + 20; x += 12) {
-      staticObject('cliff', [x + 6, -23, -4], [12, 7.3, 5]);
-      staticObject('arch', [x, -20, -6], [4.2, 6, 2.8]);
-      staticObject('wall', [x + 3.6, -16, -7], [4.3, 2.9, 1.4]);
-      staticObject('smallTree', [x + 5, -16, -4.5], [2.2, 3.2, 2.2]);
-      staticObject('grass', [x + 4, -15.9, -5], [3.2, .7, 1.7]);
-      staticObject('ladder', [x + 2, -18, -2], [.6, 2.2, .1]);
-    }
-    for (let x = -25; x < L.w + 45; x += 25) {
-      const height = 6 + ((x + 25) % 3) * 1.4;
-      staticObject('cliff', [x + 3, -24, -25], [21, 9, 9]);
-      staticObject('towerBase', [x, -15, -25], [3.7, 2.8, 3.7]);
-      staticObject('towerMid', [x, -12.2, -25], [3.7, height, 3.7]);
-      staticObject('towerTop', [x, -12.2 + height, -25], [3.8, 1.7, 3.8]);
-      staticObject('arch', [x + 9, -17, -21], [7, 8, 3]);
-      staticObject('bridge', [x + 5, -18, -25], [8, 4.2, 2]);
-    }
+    buildScenery(L, staticObject);
     batchWorld();
   }
 
@@ -173,10 +215,18 @@ export async function createView(canvas, onProgress) {
       actions[name].reset().fadeIn(name === 'Jump_Land' ? .06 : .16).play(); current = name;
     } };
   }
-  const hero = actor('hero', [.62, 1.02, .58]);
+  const hero = actor('hero', [.76, 1.3, .72]);
+  hero.group.traverse(mesh => {
+    if (!mesh.isMesh) return;
+    if (['Knife','Knife_Offhand','Throwable','1H_Crossbow','2H_Crossbow'].includes(mesh.name)) mesh.visible = false;
+    if (mesh.name === 'Rogue_Cape') mesh.material = new THREE.MeshStandardMaterial({color:'#b63823', roughness:.9, side:THREE.DoubleSide});
+    else { mesh.material = mesh.material.clone(); mesh.material.roughness = .85; }
+  });
   hero.actions.Jump_Land.setLoop(THREE.LoopOnce, 1);
   hero.actions.Jump_Land.clampWhenFinished = true;
   scene.add(hero.group); hero.animate('Idle');
+  const spellLight = new THREE.PointLight('#64c9ff',0,2.8,2);
+  scene.add(spellLight);
   const creatures = new Map();
   const items = new Map();
   const bolts = new Map();
@@ -192,7 +242,7 @@ export async function createView(canvas, onProgress) {
     return {bar, fill};
   }
   const boltGeometry = new THREE.SphereGeometry(1, 12, 8);
-  const boltMaterial = new THREE.MeshBasicMaterial({color:'#d5ffff'});
+  const boltMaterial = new THREE.MeshBasicMaterial({color:new THREE.Color().setRGB(1.1,2.5,4),toneMapped:false});
   const haloMaterial = new THREE.MeshBasicMaterial({color:'#56baff', transparent:true, opacity:.28, depthWrite:false, blending:THREE.AdditiveBlending});
   function makeBolt() {
     const group = new THREE.Group();
@@ -243,15 +293,19 @@ export async function createView(canvas, onProgress) {
         wasGrounded = P.onGround;
       }
       const speed = Math.abs(P.vx);
-      const name = mode === 'dying' ? 'Death_A_Pose' : !P.onGround ? 'Jump_Idle' : P.cd > 12 ? '1H_Ranged_Shooting' : speed > .12 ? 'Walking_A' : frame < landingUntil ? 'Jump_Land' : 'Idle';
+      const firing = bullets.some(b => b.life>0 && b.vx*P.face>0 && Math.abs(b.x-(P.face>0?P.x+P.w:P.x))<18);
+      const name = mode === 'dying' ? 'Death_A_Pose' : !P.onGround ? 'Jump_Idle' : speed > .12 ? 'Walking_A' : firing ? '1H_Ranged_Shooting' : frame < landingUntil ? 'Jump_Land' : 'Idle';
+      spellLight.position.set(hero.group.position.x+P.face*.45,hero.group.position.y+.65,.6);
+      if (moving) spellLight.intensity = THREE.MathUtils.damp(spellLight.intensity,firing?3:0,16,dt);
       const rate = name === 'Walking_A' ? THREE.MathUtils.clamp(speed / 1.25 * .85, .3, 1.3) : name === 'Jump_Idle' ? .7 : 1;
       hero.animate(name, rate); hero.mixer.update(moving ? dt : 0);
       const targetX = THREE.MathUtils.clamp(hero.group.position.x + 1.8, halfWidth, Math.max(halfWidth, L.w - halfWidth));
-      const targetY = Math.max(-13.8, hero.group.position.y + 1.2);
+      const targetY = Math.max(-12.8, hero.group.position.y + 2);
       if (previousPlayer !== P) { cameraX = targetX; cameraY = targetY; previousPlayer = P; }
       const follow = 1 - Math.exp(-dt * 7);
       cameraX += (targetX - cameraX) * follow; cameraY += (targetY - cameraY) * follow;
     } else {
+      spellLight.intensity = 0;
       cameraX = 6 + Math.sin(frame / 700) * 1.5; cameraY = -13.5;
       // The start scene also shows the playable character before the first button press.
       hero.group.visible = true; hero.group.position.set(2.5, -15, 0);
@@ -263,7 +317,7 @@ export async function createView(canvas, onProgress) {
       let a = creatures.get(e);
       if (!a) {
         const big = e.type === 'K';
-        a = actor(e.type, [big ? 2.3 : .76, big ? 1.9 : .67, big ? 1.65 : .58]);
+        a = actor(e.type, [big ? 2.3 : .94, big ? 1.9 : .82, big ? 1.65 : .72]);
         a.hp = hpBar(a.group); a.animate('walk', .75); scene.add(a.group); creatures.set(e, a);
       }
       const pos = samplePosition(e, alpha);
@@ -322,9 +376,10 @@ export async function createView(canvas, onProgress) {
     const vibration = moving && shake ? (Math.sin(frame * 2.6) * shake / TILE) : 0;
     camera.position.set(cameraX + vibration, cameraY + 1.45, 20);
     camera.lookAt(cameraX + vibration, cameraY, 0);
-    sun.position.set(cameraX - 8, cameraY + 16, 10);
+    backdrop.position.set(cameraX + Math.sin(cameraX*.006)*2, cameraY + .1, -90);
+    sun.position.set(cameraX + 8, cameraY + 16, 14);
     sun.target.position.set(cameraX, cameraY - 2, 0);
-    renderer.render(scene, camera);
+    composer.render(dt);
   }
   function resize(width, height) {
     const gameHeight = Math.min(height, width / 1.5);
@@ -332,7 +387,11 @@ export async function createView(canvas, onProgress) {
     wrap.style.width = width + 'px'; wrap.style.height = gameHeight + 'px';
     renderer.setSize(width, gameHeight, false);
     const aspect = width / gameHeight;
-    camera.aspect = aspect; halfWidth = 3.4 * aspect;
+    const panoramaAspect = panorama.image.width / panorama.image.height;
+    const backdropHeight = Math.tan(THREE.MathUtils.degToRad(camera.fov/2))*2*110*1.08*Math.max(1,aspect/panoramaAspect);
+    backdrop.scale.set(backdropHeight*panoramaAspect,backdropHeight,1);
+    composer.setSize(width, gameHeight);
+    camera.aspect = aspect; halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 20 * aspect;
     camera.updateProjectionMatrix();
   }
   return { render, resize, stats: () => ({calls:renderer.info.render.calls, triangles:renderer.info.render.triangles, models:Object.keys(models).length}) };

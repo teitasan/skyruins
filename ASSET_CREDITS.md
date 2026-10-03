@@ -8,10 +8,20 @@
 | 地面、足場、植物、コイン、ハート、敵キャラクター | Kenney Platformer Kit 4.1 | CC0 1.0 | https://kenney.nl/assets/platformer-kit |
 | 石のアーチ、城壁、塔、遠景、橋 | Kenney Castle Kit | CC0 1.0 | https://kenney.nl/assets/castle-kit |
 | 主人公と待機・走行・ジャンプ・射撃のアニメーション | KayKit Adventurers Character Pack 1.0 / Rogue | CC0 1.0 | https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0 |
+| 葉のある樹木、シダ、草、花、茂み、岩 | Quaternius Stylized Nature MegaKit Standard | CC0 1.0 | https://quaternius.com/packs/stylizednaturemegakit.html |
+| 苔石の色・法線・粗さ | Poly Haven / Mossy Stone Wall / Amal Kumar | CC0 1.0 | https://polyhaven.com/a/mossy_stone_wall |
+| 岩の色・法線・粗さ | Poly Haven / Rock Pitted Mossy / Dimitrios Savva, Rico Cilliers | CC0 1.0 | https://polyhaven.com/a/rock_pitted_mossy |
+| 屋外の環境光 | Poly Haven / Kloofendal 48d Partly Cloudy Pure Sky / Greg Zaal, Jarod Guest | CC0 1.0 | https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky |
+| HUDのハート形状 | Bootstrap Icons 1.11.3 / The Bootstrap Authors | MIT | https://icons.getbootstrap.com/icons/heart-fill/ |
+| 空の遺跡の遠景パノラマ | このプロジェクト向けのimage_gen生成素材 | AI生成のプロジェクト素材 | `public/assets/scenery/SOURCE.md` |
 
 Kenney / KayKit の CC0 素材にクレジット表示義務はありませんが、作者と出典を記録しています。
 Three.js の著作権・MITライセンス全文は `public/licenses/three-LICENSE.txt` に保持しています。
 素材の配布時ライセンスは、それぞれの `public/assets/<pack>/LICENSE.txt` に保持しています。
+Bootstrap Icons の MIT ライセンス全文は `public/licenses/bootstrap-icons-LICENSE.txt` に保持しています。
+Quaternius Standard は配布元のCC0表示と同梱License_Standard.txtを確認し、glTFの必要な素材だけを取り込んでいます。
+取得用ミラー: https://github.com/agentkaerf/FreeModels 、固定コミット `db3df04d1e4714298a09510b26fb6de6645138a2`。
+Poly Haven は https://polyhaven.com/license でCC0を確認しています。1Kの配信データをそのまま収録しました。
 
 KayKit の取得元コミット: `672074b73ba276876a19e8816ecdc5241817ab47`。
 Kenney の取得アーカイブ:
@@ -34,4 +44,6 @@ Kenney の取得アーカイブ:
 - GamepadJs: https://github.com/alaingilbert/GamepadJs (MIT) を調査。既存ゲームはフレームごとの押下状態と入力エッジを使うため、ブラウザ標準 Gamepad API を既存入力につなぐ最小限のアダプターを使用しています。
 
 新規コードは描画と既存処理の接続、入力の接続に限定し、ゲームシステムやキャラクターモデルの新規制作は行っていません。
+遠景の生成前には上記のCC0素材を実画面で比較しました。汎用の塔や壁を繰り返し配置すると、参照画像のような谷・橋・城の構図を作れなかったため、背景画を制作しました。新しい主人公モデルは制作せず、KayKitの既存モデルを再利用し、赤いマントと不要な武器の非表示で調整しています。
+植生のバッチ描画では元の頂点カラーとアルファテストを保持しています。光のにじみはThree.jsのMITライセンス付き `UnrealBloomPass` / `OutputPass` を使用しています。
 Google Fonts は元のHTMLから継続利用しています。利用不能の場合はシステムフォントにフォールバックします。

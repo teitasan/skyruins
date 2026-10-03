@@ -75,6 +75,151 @@
     "bytes": 16670
   },
   {
+    "path": "assets/nature/Bark_NormalTree.png",
+    "sha256": "f36e94fdd73255347325b998e02a0b2575fdf714b0315bfe5e8ff34bc8e13603",
+    "bytes": 3894788
+  },
+  {
+    "path": "assets/nature/Bark_NormalTree_Normal.png",
+    "sha256": "852f6155404b8c39e100e41e26970e02a6a5c81b482d3726618dab28e3ad03a2",
+    "bytes": 4384496
+  },
+  {
+    "path": "assets/nature/Bush_Common_Flowers.bin",
+    "sha256": "15f56a013afe0eecaded0eb97fd8f323305af11e1f0f7bb9b68472ec4cdc20d5",
+    "bytes": 128928
+  },
+  {
+    "path": "assets/nature/Bush_Common_Flowers.gltf",
+    "sha256": "08768c680e3abeafd25858c9d3f369bcb7eed014661d3b6825a397f2a6a3deea",
+    "bytes": 3654
+  },
+  {
+    "path": "assets/nature/CommonTree_1.bin",
+    "sha256": "9dd689e84e1aa2f5b08db8def591254d582783c73737af54ba0d89b3e549c3ae",
+    "bytes": 491576
+  },
+  {
+    "path": "assets/nature/CommonTree_1.gltf",
+    "sha256": "b51cdea6545edb51d102dd6c27caafe62aa75e3c328ac8f9039f4e7bfd690bfa",
+    "bytes": 3869
+  },
+  {
+    "path": "assets/nature/CommonTree_4.bin",
+    "sha256": "4fa52cc5bb9aa42d5ce1eee6cffca0f0a7f25dd07fe4431e371548e89bc30233",
+    "bytes": 307596
+  },
+  {
+    "path": "assets/nature/CommonTree_4.gltf",
+    "sha256": "ddf0e8837705702871d3f03de8cf7aeed61ad4bf8ee92052b6f95bdd771297b6",
+    "bytes": 3865
+  },
+  {
+    "path": "assets/nature/Fern_1.bin",
+    "sha256": "5e92b87a27f81a69fe15347a533df3c77d567b48298dceeef43168ccb7c22853",
+    "bytes": 11448
+  },
+  {
+    "path": "assets/nature/Fern_1.gltf",
+    "sha256": "d41915cffe9dbbde1ae88be381eb9c60f7caa2274511436cc78fe4de627468ab",
+    "bytes": 2058
+  },
+  {
+    "path": "assets/nature/Flower_3_Group.bin",
+    "sha256": "5ab387dd3d6fe181df3af4eeac4df85533e4c27e77545ae39a61e0c2aaaab248",
+    "bytes": 27772
+  },
+  {
+    "path": "assets/nature/Flower_3_Group.gltf",
+    "sha256": "4df1612371982c543f930d6b213967372e0d459622d7eff7fc2ed1ddbfaa3b6c",
+    "bytes": 3629
+  },
+  {
+    "path": "assets/nature/Flowers.png",
+    "sha256": "5c531f2329c241c625aafd6cb769de29f33b480ef2a16491c2489f3c68e62a6a",
+    "bytes": 444609
+  },
+  {
+    "path": "assets/nature/Grass.png",
+    "sha256": "5d69048193b246a73c996b892607fb36c75d0c60afcb2dab8aa12de3c0b2d9bd",
+    "bytes": 33605
+  },
+  {
+    "path": "assets/nature/Grass_Common_Short.bin",
+    "sha256": "7a0f0f7a9ac39cfa4b303bac03a6594f43e48d873b73553fa06a79e4df1271e9",
+    "bytes": 7052
+  },
+  {
+    "path": "assets/nature/Grass_Common_Short.gltf",
+    "sha256": "6957b50622c9e26e7296c1b47ea8653bc0d957e0a547de444e2ed96f0075a21a",
+    "bytes": 2023
+  },
+  {
+    "path": "assets/nature/Grass_Wispy_Short.bin",
+    "sha256": "c38f46e5a66ed3917fd45104effb914228d43d3724f4659416e1533dcd71776d",
+    "bytes": 25324
+  },
+  {
+    "path": "assets/nature/Grass_Wispy_Short.gltf",
+    "sha256": "3c1d3bdd332420e070abde72d73611d1f13acfbe027e26b2fb943f9bcbd6b1c5",
+    "bytes": 2025
+  },
+  {
+    "path": "assets/nature/LICENSE.txt",
+    "sha256": "120710e542c3ebaf83856c4eb55b4a1e680593b39302eba7fdc5d942dfe78c58",
+    "bytes": 852
+  },
+  {
+    "path": "assets/nature/Leaves.png",
+    "sha256": "23248cebe28a24e78add32db3c2ee2f4d7b9219e9d2467279722f0197a7b6bd5",
+    "bytes": 2586432
+  },
+  {
+    "path": "assets/nature/Leaves_NormalTree_C.png",
+    "sha256": "998612bdf0b76a22f5f54d65cd7a457815d2842d89653fa4348a4ebb42933ad3",
+    "bytes": 158796
+  },
+  {
+    "path": "assets/nature/Rock_Medium_1.bin",
+    "sha256": "ea79527d4c2b3bdb7a28bf589bf0c1fd96d192a4d0738636753911dd58681e99",
+    "bytes": 13284
+  },
+  {
+    "path": "assets/nature/Rock_Medium_1.gltf",
+    "sha256": "5d1ab1fa03218f4a908728ed0eabe6486344a7e4f510b0d3d6f837fd1d011bd8",
+    "bytes": 1831
+  },
+  {
+    "path": "assets/nature/Rock_Medium_2.bin",
+    "sha256": "76b60bf8349f71abdb0ed462b3223d93c2dcabdfb5754bc132e18b021cc6c805",
+    "bytes": 9432
+  },
+  {
+    "path": "assets/nature/Rock_Medium_2.gltf",
+    "sha256": "fac2d05a05f2d0d2098de59c09b58f42cc875c9caca4fd4c4bd57f3d36e7b12e",
+    "bytes": 1825
+  },
+  {
+    "path": "assets/nature/Rock_Medium_3.bin",
+    "sha256": "63f94bce2d3fb3fe25b2d6c843a828b1bec76855dbaac93fcf5d43582309caad",
+    "bytes": 20124
+  },
+  {
+    "path": "assets/nature/Rock_Medium_3.gltf",
+    "sha256": "9a575b911372cf91693aa3a56aea8137ec2251c2b99fb34a31272ee64503047f",
+    "bytes": 1832
+  },
+  {
+    "path": "assets/nature/Rocks_Diffuse.png",
+    "sha256": "b813696df6081f469a127092eb0ce45cc39d56f3ccc0699152bfcd3804810b48",
+    "bytes": 2517398
+  },
+  {
+    "path": "assets/nature/SOURCE.json",
+    "sha256": "615628e68509165a3f3f90643a13c8237e7da094ab47f39853aa1dcf41692b03",
+    "bytes": 238
+  },
+  {
     "path": "assets/platformer/LICENSE.txt",
     "sha256": "b8cccfd97148d929e3df4b0fd05bdadebf9b671cc98c968dae9e1f5e5479cf6a",
     "bytes": 674
@@ -163,5 +308,60 @@
     "path": "assets/platformer/tree.glb",
     "sha256": "632eb83a4359afd110594ea6f69db4db0c9512c79ae2c88741cf68e527253e41",
     "bytes": 42680
+  },
+  {
+    "path": "assets/scenery/SOURCE.md",
+    "sha256": "7ebd455cd2d2d23993984be905876f948d5fb0684064938387b651fe968e9c78",
+    "bytes": 942
+  },
+  {
+    "path": "assets/scenery/skyruins-valley-v1.png",
+    "sha256": "bbb685aadc3996f16fa675aa0c4f002f41edf04e645386366982fe7c79cbc4b6",
+    "bytes": 2706488
+  },
+  {
+    "path": "assets/surfaces/LICENSE.txt",
+    "sha256": "724445bc31086246d18dff4fa437d7d9ed7adda157ac6486213ce86234bd27dc",
+    "bytes": 268
+  },
+  {
+    "path": "assets/surfaces/kloofendal_48d_partly_cloudy_puresky_1k.hdr",
+    "sha256": "fd94c84997b8a3c353b62c2125a9b44e19509956986a126e472684432a02d798",
+    "bytes": 1435119
+  },
+  {
+    "path": "assets/surfaces/mossy_stone_wall_diff_1k.jpg",
+    "sha256": "7240e55cfc662ea403600fc7d5143f72983fbe8098d55fc6ccae75d21421dce4",
+    "bytes": 939649
+  },
+  {
+    "path": "assets/surfaces/mossy_stone_wall_nor_gl_1k.jpg",
+    "sha256": "e159e429269bc933743ee47051b4081261e6131e994242bf26e05ab0a0df4542",
+    "bytes": 1282621
+  },
+  {
+    "path": "assets/surfaces/mossy_stone_wall_rough_1k.jpg",
+    "sha256": "06b19bedb07c6f81acdd8a461e73e7c3d5bfa0afedba8b4e9bda9cb50fb0b1fb",
+    "bytes": 476684
+  },
+  {
+    "path": "assets/surfaces/rock_pitted_mossy_diff_1k.jpg",
+    "sha256": "afc60b7dee7c161c12a9fb3fffee2c118f1fe47aa1f1e21e4670180bbf29de3c",
+    "bytes": 1087680
+  },
+  {
+    "path": "assets/surfaces/rock_pitted_mossy_nor_gl_1k.jpg",
+    "sha256": "070501836252ec7a7c2193531095fe4d442b649b9374361500183c3ed832f2fb",
+    "bytes": 1137508
+  },
+  {
+    "path": "assets/surfaces/rock_pitted_mossy_rough_1k.jpg",
+    "sha256": "684e3314a64f2a9c89a79795adb71be88d90fdf0bda2a3c12685da425e5a413f",
+    "bytes": 647478
+  },
+  {
+    "path": "assets/ui/heart-fill.svg",
+    "sha256": "2903966b0b1a314d61485658ec700fea9ac4b996621fbbc08117da1f35896b69",
+    "bytes": 241
   }
 ]

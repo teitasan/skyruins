@@ -36,6 +36,20 @@ test('既存のセーブを読み、左右移動はX軸のゲーム処理だけ�
   assert.equal(game.snapshot().player.y,start.y);
 });
 
+test('出口の中心に入るとクリアし、ボス生存中は出口が封印される', () => {
+  for(const stage of [1,3]) {
+    const {game}=setup();game.beginFrom({stage,coins:0,skills:{}});
+    const goal=game.L.spawns.find(s=>s.ch==='G');
+    Object.assign(game.P,{x:goal.tx*16+3,y:(goal.ty+1)*16-game.P.h,vx:0,vy:0,onGround:true,inv:200});
+    game.step(1);
+    if(stage===1)assert.equal(game.mode,'clearing');
+    else {
+      const boss=game.enemies.find(e=>e.type==='K');assert.ok(boss);
+      assert.equal(game.mode,'play');boss.dead=true;game.step(1);assert.equal(game.mode,'clearing');
+    }
+  }
+});
+
 test('A相当のジャンプは押す長さで高さが変わり、足場に着地する', () => {
   function jump(held) {
     const {game}=setup();game.beginFrom({stage:1,coins:0,skills:{}});game.step(3);

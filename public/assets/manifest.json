@@ -1,5 +1,15 @@
 [
   {
+    "path": "assets/adventurer/SOURCE.md",
+    "sha256": "b1105338102ef8d5ff0cbf96329bbfb7775b01e059ff4bbfa5da4e7e4e580b7b",
+    "bytes": 1541
+  },
+  {
+    "path": "assets/adventurer/hero-v1.glb",
+    "sha256": "c849294b2752e5cfaaf64f3521b61960093ad73fed7dc431515292acbe446d24",
+    "bytes": 634456
+  },
+  {
     "path": "assets/castle/LICENSE.txt",
     "sha256": "b83a5e33e7a037eeae41791f52caa6879de7870c567ac5c9a2b9b9e9e4c02e1f",
     "bytes": 684
@@ -73,6 +83,16 @@
     "path": "assets/kaykit/rogue_texture.png",
     "sha256": "a4032e877c3b91939f5cdbb630349c1998fdbc3211bbd587c111125500fe4cc5",
     "bytes": 16670
+  },
+  {
+    "path": "assets/landmarks/SOURCE.md",
+    "sha256": "fb352f370262df75b58d4df76654848abf25c1e08a390c59d59b2e38e46f9c82",
+    "bytes": 1184
+  },
+  {
+    "path": "assets/landmarks/exit-gate-v1.glb",
+    "sha256": "d52eebb3fc879b212e0e29e3fe3f25881066dbf8ed358315e6a647089ba9e52a",
+    "bytes": 370644
   },
   {
     "path": "assets/nature/Bark_NormalTree.png",

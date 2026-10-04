@@ -366,7 +366,7 @@ function update() {
   else if (mode === 'clearing') {
     modeT++;
     goal.flagY = Math.min(goal.bottom - 20, goal.flagY + 2.5);
-    if (modeT % 12 === 0) burst(goal.x + (Math.random() - 0.5) * 120, 40 + Math.random() * 60, 18, ['#ffd166', '#ff6b6b', '#7bdcff', '#fff'], 2.6, 0.05, 50);
+    if (modeT % 12 === 0) burst(goal.x + (Math.random() - 0.5) * 48, goal.bottom-35-Math.random()*20, 12, ['#ffd166', '#7bdcff', '#fff'], 1.2, 0.025, 50);
     if (modeT > 100) openTree(true);
   }
   if (mode === 'play' || mode === 'dying' || mode === 'clearing') {

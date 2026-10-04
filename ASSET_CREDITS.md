@@ -14,6 +14,8 @@
 | 屋外の環境光 | Poly Haven / Kloofendal 48d Partly Cloudy Pure Sky / Greg Zaal, Jarod Guest | CC0 1.0 | https://polyhaven.com/a/kloofendal_48d_partly_cloudy_puresky |
 | HUDのハート形状 | Bootstrap Icons 1.11.3 / The Bootstrap Authors | MIT | https://icons.getbootstrap.com/icons/heart-fill/ |
 | 空の遺跡の遠景パノラマ | このプロジェクト向けのimage_gen生成素材 | AI生成のプロジェクト素材 | `public/assets/scenery/SOURCE.md` |
+| 主人公の髪・青い服・赤いスカーフ・旅の鞄 | KayKit RogueをBlenderで改修。骨格・顔・7種のアニメーションを再利用 | 改修元CC0、新規形状はプロジェクト制作 | `public/assets/adventurer/SOURCE.md` |
+| 光る遺跡の出口 | Kenney Castle Kitの城門をBlenderで改修。Poly Haven石材を再利用 | 改修元CC0、新規形状はプロジェクト制作 | `public/assets/landmarks/SOURCE.md` |
 | 連続したアーチ橋、欠けた舗装、深い岩盤 | Blender 5.2でプロジェクト向けに制作。舗装はKenneyのCC0石材形状を改修 | 改修元はCC0、新規形状はプロジェクト制作 | `public/assets/ruins/SOURCE.md` / `art/blender/ruins-source.blend` |
 
 Kenney / KayKit の CC0 素材にクレジット表示義務はありませんが、作者と出典を記録しています。

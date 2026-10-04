@@ -33,6 +33,15 @@ try {
         game.setKey('jump',false); game.togglePause();
       },
       'スキル画面を確認': () => game.openTree(false),
+      'ゴールの描画を確認': () => {
+        game.beginFrom({stage:1,coins:0,skills:{}});
+        const goal=game.L.spawns.find(s=>s.ch==='G');
+        Object.assign(game.P,{x:goal.tx*16-48,y:(goal.ty+1)*16-game.P.h,vx:0,vy:0,onGround:true});
+      },
+      '出口に入る動きを確認': () => {
+        actions['ゴールの描画を確認']();game.setKey('right',true);
+        motionTimers.push(setTimeout(()=>game.setKey('right',false),1200));
+      },
       'クリア進行を確認': () => {if (game.mode === 'tree') game.startStage(game.save.stage);game.clearStage();},
     };
     for (const [text, action] of Object.entries(actions)) {

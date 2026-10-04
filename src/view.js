@@ -13,9 +13,10 @@ import { buildScenery } from './scenery.js';
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 const TILE = 16;
 const specifications = {
-  hero: ['kaykit', 'Rogue'],
+  hero: ['adventurer', 'hero-v1'],
+  exitGate: ['landmarks','exit-gate-v1'],
   stone: ['platformer', 'brick'], coin: ['platformer', 'coin-gold'], heart: ['platformer', 'heart'],
-  spikes: ['platformer', 'trap-spikes'], flag: ['platformer', 'flag'], ladder: ['platformer', 'ladder'],
+  spikes: ['platformer', 'trap-spikes'], ladder: ['platformer', 'ladder'],
   s: ['platformer', 'character-oobi'], b: ['platformer', 'character-ooli'],
   f: ['platformer', 'character-oodi'], k: ['platformer', 'character-oozi'], K: ['platformer', 'character-oobi'],
   pillar: ['castle', 'wall-pillar'],
@@ -99,10 +100,30 @@ export async function createView(canvas, onProgress) {
   composer.addPass(new OutputPass());
   const normalized = new Map();
   const modelSizes = new Map();
+  const gateRuneMaterial = new THREE.MeshStandardMaterial({color:'#5bbedd',emissive:'#40cfff',emissiveIntensity:2.2,roughness:.4,side:THREE.DoubleSide});
+  const gateGoldMaterial = new THREE.MeshStandardMaterial({color:'#cfa358',metalness:.65,roughness:.45});
   function model(key) {
     if (normalized.has(key)) return normalized.get(key);
     const gltf = models[key];
     const object = gltf.scene;
+    if (key === 'exitGate') {
+      object.updateMatrixWorld(true);
+      object.traverse(child=>{if(child.isMesh){
+        child.castShadow = true; child.receiveShadow = true;
+        const name = child.material.name;
+        child.material = name === 'goal_rune' ? gateRuneMaterial : name === 'goal_gold' ? gateGoldMaterial : name === 'goal_stone' ? masonryMaterial : rockMaterial;
+        if(name === 'goal_stone' || name === 'goal_carving') {
+          const geometry = child.geometry.toNonIndexed(), pos = geometry.attributes.position, normal = geometry.attributes.normal;
+          const uv = new Float32Array(pos.count*2);
+          for(let t=0;t<pos.count;t+=3) {
+            const n = new THREE.Vector3(); for(let j=0;j<3;j++)n.add(new THREE.Vector3().fromBufferAttribute(normal,t+j));
+            for(let j=0;j<3;j++){const i=t+j;uv[i*2]=.3*(Math.abs(n.x)>Math.abs(n.z)?pos.getZ(i):pos.getX(i));uv[i*2+1]=.3*(Math.abs(n.y)>Math.max(Math.abs(n.x),Math.abs(n.z))?pos.getZ(i):pos.getY(i));}
+          }
+          geometry.setAttribute('uv',new THREE.BufferAttribute(uv,2));child.geometry=geometry;
+        }
+      }});
+      normalized.set(key,object);return object;
+    }
     if (specifications[key][0] === 'ruins') {
       object.traverse(child=>{if(child.isMesh){
         child.castShadow = true;child.receiveShadow = true;
@@ -121,7 +142,7 @@ export async function createView(canvas, onProgress) {
     const group = new THREE.Group();
     const offset = new THREE.Group();
     offset.scale.set(1 / size.x, 1 / size.y, 1 / size.z);
-    object.position.sub(new THREE.Vector3(center.x, box.min.y, center.z));
+    object.position.sub(new THREE.Vector3(key === 'hero' ? 0 : center.x, box.min.y, key === 'hero' ? 0 : center.z));
     offset.add(object); group.add(offset);
     object.traverse(child => { if (child.isMesh) { child.castShadow = true; child.receiveShadow = true; } });
     if (specifications[key][0] === 'nature') object.traverse(child => {
@@ -238,7 +259,7 @@ export async function createView(canvas, onProgress) {
       actions[name].reset().fadeIn(name === 'Jump_Land' ? .06 : .16).play(); current = name;
     } };
   }
-  const hero = actor('hero', [.76, 1.3, .72]);
+  const hero = actor('hero', [.76, 1.55, .72]);
   hero.group.traverse(mesh => {
     if (!mesh.isMesh) return;
     if (['Knife','Knife_Offhand','Throwable','1H_Crossbow','2H_Crossbow'].includes(mesh.name)) mesh.visible = false;
@@ -290,7 +311,19 @@ export async function createView(canvas, onProgress) {
     const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:texture, transparent:true, depthTest:false}));
     sprite.scale.set(.95, .48, 1); scene.add(sprite); return sprite;
   }
-  let flag = null;
+  // The exit stays centered on the existing goal collision line.
+  const gate = new THREE.Group();gate.add(model('exitGate').clone(true));scene.add(gate);gate.visible=false;
+  for(const [key,x,height,angle] of [['fern',-1.48,.43,.4],['wisps',-1.15,.23,-.3],['fern',1.50,.37,-.8],['blossoms',1.27,.26,.9]]) {
+    const plant=model(key).clone(true);plant.position.set(x,4.11,.1);plant.scale.set(.62,height,.55);plant.rotation.y=angle;gate.add(plant);
+  }
+  const opening = new THREE.Shape();opening.moveTo(-.85,.10);opening.lineTo(.85,.10);opening.lineTo(.85,2.03);opening.quadraticCurveTo(.85,2.91,0,3.05);opening.quadraticCurveTo(-.85,2.91,-.85,2.03);opening.closePath();
+  const portalMaterial = new THREE.MeshBasicMaterial({color:'#55d7ff',transparent:true,opacity:.18,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending});
+  const portal = new THREE.Mesh(new THREE.ShapeGeometry(opening),portalMaterial);portal.position.z=.05;gate.add(portal);
+  const outline = new THREE.CatmullRomCurve3(opening.getPoints(48).map(p=>new THREE.Vector3(p.x,p.y,.08)),true);
+  const portalEdge = new THREE.Mesh(new THREE.TubeGeometry(outline,96,.026,6,true),gateRuneMaterial);gate.add(portalEdge);
+  const motes = Array.from({length:14},(_,i)=>{const mesh=new THREE.Mesh(particleGeometry,gateRuneMaterial);mesh.scale.setScalar(.38+i%3*.15);gate.add(mesh);return mesh;});
+  const exitLabel = textSprite('出口','#ffe1ac');exitLabel.scale.set(1.35,.67,1);exitLabel.position.set(0,4.43,.1);gate.add(exitLabel);
+  let goalLocked = false;
   let cameraX = 5.7, cameraY = -13.8, lastTime = performance.now(), previousPlayer = null;
   let wasGrounded = false, landingUntil = 0;
   function sweep(map, live, cleanup = () => {}) {
@@ -299,7 +332,7 @@ export async function createView(canvas, onProgress) {
     }
   }
   function render(state) {
-    const { L, P, enemies, bullets, coins, pickups, parts, texts, goal, frame, mode, shake, alpha = 1 } = state;
+    const { L, P, enemies, bullets, coins, pickups, parts, texts, goal, frame, mode, bossRef, shake, alpha = 1 } = state;
     if (!L) return;
     const now = performance.now();
     const dt = Math.min(.05, (now - lastTime) / 1000); lastTime = now;
@@ -317,7 +350,7 @@ export async function createView(canvas, onProgress) {
       }
       const speed = Math.abs(P.vx);
       const firing = bullets.some(b => b.life>0 && b.vx*P.face>0 && Math.abs(b.x-(P.face>0?P.x+P.w:P.x))<18);
-      const name = mode === 'dying' ? 'Death_A_Pose' : !P.onGround ? 'Jump_Idle' : speed > .12 ? 'Walking_A' : firing ? '1H_Ranged_Shooting' : frame < landingUntil ? 'Jump_Land' : 'Idle';
+      const name = mode === 'dying' ? 'Death_A_Pose' : mode === 'clearing' ? 'Cheer' : !P.onGround ? 'Jump_Idle' : speed > .12 ? 'Walking_A' : firing ? '1H_Ranged_Shooting' : frame < landingUntil ? 'Jump_Land' : 'Idle';
       spellLight.position.set(hero.group.position.x+P.face*.45,hero.group.position.y+.65,.6);
       if (moving) spellLight.intensity = THREE.MathUtils.damp(spellLight.intensity,firing?3:0,16,dt);
       const rate = name === 'Walking_A' ? THREE.MathUtils.clamp(speed / 1.25 * .85, .3, 1.3) : name === 'Jump_Idle' ? .7 : 1;
@@ -393,9 +426,16 @@ export async function createView(canvas, onProgress) {
       sprite.material.opacity = Math.min(1, t.life / 15);
     }
     if (goal) {
-      if (!flag) {flag = model('flag').clone(true); flag.scale.set(1.0, 4.3, .5); scene.add(flag);}
-      flag.visible = true; flag.position.set(goal.x / TILE, -goal.bottom / TILE, -.15);
-    } else if (flag) flag.visible = false;
+      gate.visible = true; gate.position.set(goal.x / TILE, -goal.bottom / TILE, -.65);
+      const locked = Boolean(bossRef && !bossRef.dead);
+      if(locked !== goalLocked) {
+        goalLocked=locked;gateRuneMaterial.color.set(locked?'#c58b43':'#5bbedd');gateRuneMaterial.emissive.set(locked?'#e79d36':'#40cfff');
+        portalMaterial.color.set(locked?'#e6a34c':'#55d7ff');
+        const label=textSprite(locked?'封印中':'出口','#ffe1ac');exitLabel.material.dispose();exitLabel.material=label.material;scene.remove(label);
+      }
+      portalMaterial.opacity = locked ? .045 : (mode === 'clearing' ? .38 : .15+.04*Math.sin(frame*.025));
+      for(let i=0;i<motes.length;i++) {const phase=frame*.012+i*2.4;motes[i].visible=!locked;motes[i].position.set(Math.sin(phase)*.7,.35+(frame*.009+i*.21)%2.6,.2+Math.cos(phase)*.18);}
+    } else gate.visible = false;
     const vibration = moving && shake ? (Math.sin(frame * 2.6) * shake / TILE) : 0;
     camera.position.set(cameraX + vibration, cameraY + 1.45, 20);
     camera.lookAt(cameraX + vibration, cameraY, 0);

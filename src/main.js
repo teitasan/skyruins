@@ -11,9 +11,21 @@ try {
   // Local-only scene checks. Vite removes this branch from the production bundle.
   if (import.meta.env.DEV && new URLSearchParams(location.search).has('qa')) {
     const panel = document.createElement('aside');
-    panel.style.cssText = 'position:fixed;bottom:4px;left:4px;z-index:100;display:flex;gap:6px';
+    panel.style.cssText = 'position:fixed;bottom:4px;left:4px;right:4px;z-index:100;display:flex;flex-wrap:wrap;gap:6px';
     let motionTimers = [];
     const actions = {
+      '歩行の描画を確認': () => {
+        game.beginFrom({stage:1,coins:0,skills:{}});
+        game.setKey('right',true);game.step(22);game.togglePause();
+      },
+      'ダッシュの描画を確認': () => {
+        game.beginFrom({stage:1,coins:0,skills:{}});
+        game.setKey('right',true);game.setKey('dash',true);game.step(22);game.togglePause();
+      },
+      '左向きの描画を確認': () => {
+        game.beginFrom({stage:1,coins:0,skills:{}});
+        game.setKey('left',true);game.step(14);game.togglePause();
+      },
       '歩行とジャンプを確認': () => {
         game.beginFrom({stage:1,coins:0,skills:{}});
         game.setKey('right',true);
@@ -47,13 +59,18 @@ try {
     for (const [text, action] of Object.entries(actions)) {
       const button = document.createElement('button');button.textContent=text;button.onclick=()=>{
         motionTimers.forEach(clearTimeout); motionTimers = [];
-        for (const key of ['left','right','jump','shoot']) game.setKey(key,false);
+        for (const key of ['left','right','jump','shoot','dash']) game.setKey(key,false);
         button.blur();
         if (document.getElementById('ov-msg').classList.contains('show')) document.getElementById('msg-b').click();
         action();
       };panel.append(button);
     }
     document.body.append(panel);
+    const pose = document.createElement('output');pose.id='qa-pixel-pose';
+    pose.style.cssText='position:fixed;top:2px;left:2px;z-index:100;color:white;background:#18202bcc;font:12px monospace;padding:4px;pointer-events:none';
+    document.body.append(pose);
+    const showPose = () => {const p=view.stats().hero;pose.textContent=`${p.animation} ${p.index+1} ${p.face<0?'←':'→'}`;requestAnimationFrame(showPose);};
+    showPose();
   }
 } catch (error) {
   console.error(error);

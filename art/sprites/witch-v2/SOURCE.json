@@ -1,0 +1,60 @@
+{
+  "revision": "witch-v2",
+  "generatedOn": "2026-10-04",
+  "method": "Built-in image_gen, walk-only generation followed by gait refinement",
+  "reference": "idle.png, unchanged user-provided image",
+  "promptFile": "prompts.json",
+  "changes": [
+    "8 walk poses: contact/down/passing/up, alternating legs",
+    "Clearer foot placement and knee articulation",
+    "Ground baseline pivots for stable playback"
+  ],
+  "retained": [
+    "idle.png identical to V1 and supplied source",
+    "witch-motions-v1.png identical to V1; dash/jump frame coordinates and timings identical"
+  ],
+  "walkingSheet": {
+    "image": "witch-walk-v2.png",
+    "frames": 8,
+    "size": [
+      1774,
+      887
+    ],
+    "order": "4 columns x 2 rows, row-major"
+  },
+  "rights": "Reference rights retained. Generated new animation artwork is not asserted to be CC0.",
+  "priorResearch": "../witch-v1/SOURCE.json",
+  "preview": "preview.html",
+  "files": [
+    {
+      "path": "animations.json",
+      "bytes": 8874,
+      "sha256": "18a15e4ccdfe9cb150e159fdd31830e1662784752ebe5ed9d6dd2d03739ab7fe"
+    },
+    {
+      "path": "idle.png",
+      "bytes": 19773,
+      "sha256": "b76ed51e0b7860288a36d7a68e3f4ffea5c2b03ba4e3836955251d888d8800f9"
+    },
+    {
+      "path": "preview.html",
+      "bytes": 9004,
+      "sha256": "f857b900ec91d647d7cc09900fd24311e18bdf4824c72c05262327d394f56b07"
+    },
+    {
+      "path": "prompts.json",
+      "bytes": 7572,
+      "sha256": "cb9f1f7c5be5383ea40787178ba51473d2e1216e30740b4d7e4cdcbd48f01b10"
+    },
+    {
+      "path": "witch-motions-v1.png",
+      "bytes": 2174440,
+      "sha256": "15a000092dfabae3f45e5c8a1b43c2453ca9b6d60f6bd08c5e80bb051f7c39b6"
+    },
+    {
+      "path": "witch-walk-v2.png",
+      "bytes": 1760554,
+      "sha256": "77f0f41b910592597e05ecf077bd75aa8c17c2d9da8c7ef70e6f863dae755aee"
+    }
+  ]
+}

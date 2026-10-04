@@ -1,0 +1,63 @@
+{
+  "reference": {
+    "source": "User-provided refined_2026-10-04_15-40-16.png",
+    "copiedAs": "idle.png",
+    "modified": false,
+    "rights": "User-provided artwork; original rights are retained. Not asserted to be CC0."
+  },
+  "motions": {
+    "file": "witch-motions-v1.png",
+    "method": "Built-in image_gen, reference-guided generation plus layout refinement",
+    "generatedOn": "2026-10-04",
+    "frames": 18,
+    "rows": [
+      "walk: 6 frames",
+      "dash: 6 frames",
+      "jump: 6 frames"
+    ],
+    "background": "Actual alpha transparency",
+    "promptFile": "prompts.json",
+    "notes": "Generated animation draft. Preserve source PNG unchanged; animations.json gives explicit frame crops and foot pivots because the generated grid is not mathematically uniform. Preview uses nearest-neighbor sampling."
+  },
+  "existingCandidates": [
+    {
+      "url": "https://kenney.nl/assets/pixel-platformer",
+      "license": "CC0 1.0",
+      "decision": "Not used: 18x18 tile style and different characters do not preserve the user-specified witch identity."
+    },
+    {
+      "url": "https://opengameart.org/content/witch-cc0-sprite",
+      "author": "TagGames",
+      "license": "CC0",
+      "decision": "Not used: a different witch design; the requested character identity takes precedence."
+    }
+  ],
+  "integration": "Asset package only. Existing dirty README.md, index.html, src/game.js and src/view.js are untouched. No Pages update.",
+  "files": [
+    {
+      "path": "idle.png",
+      "bytes": 19773,
+      "sha256": "b76ed51e0b7860288a36d7a68e3f4ffea5c2b03ba4e3836955251d888d8800f9"
+    },
+    {
+      "path": "witch-motions-v1.png",
+      "bytes": 2174440,
+      "sha256": "15a000092dfabae3f45e5c8a1b43c2453ca9b6d60f6bd08c5e80bb051f7c39b6"
+    },
+    {
+      "path": "animations.json",
+      "bytes": 5861,
+      "sha256": "27275ff28d2de14eb252a8ea9eea87bed425e26f3be83783c1f0687cbbb16164"
+    },
+    {
+      "path": "prompts.json",
+      "bytes": 5289,
+      "sha256": "3f7a60f1b893f69bb4aea135ecf7e6b69aed52e4f051a1ce284ba4b246299b84"
+    },
+    {
+      "path": "preview.html",
+      "bytes": 7552,
+      "sha256": "7adf0c17fb66110f4928f6fd8191619a90c245872a314765bf2bad734fb085d7"
+    }
+  ]
+}

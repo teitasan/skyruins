@@ -5,7 +5,7 @@ export function createGame(view) {
 const B = {
   // 物理（1フレーム=1/60秒、単位はpx）
   gravity: 0.2, fallGravity: 0.26, apexGravity: 0.1, apexSpeed: 1.2, gravityRelease: 0.32, maxFall: 5.8,
-  runBase: 1.25, runPerLv: 0.22,
+  runBase: 1.25, runPerLv: 0.22, dashMul: 1.55,
   accelGround: 0.16, accelAir: 0.08, airPerLv: 0.055, friction: 0.2,
   jumpBase: 4.4, jumpPerLv: 0.36, extraJumpV: 4.2,
   coyote: 6, jumpBuffer: 7, floatFall: 1.1,
@@ -123,15 +123,19 @@ function fit() {
 addEventListener('resize', fit); fit();
 
 /* ================= 入力 ================= */
-const K = { left: false, right: false, jump: false, shoot: false };
+const K = { left: false, right: false, jump: false, shoot: false, dash: false };
 let jumpEdge = false;
-let padPrevious = {}, padHeld = false;
+let padPrevious = {}, padHeld = false, activePad = null;
+function rumble(strong, weak, duration) {
+  try { activePad?.vibrationActuator?.playEffect?.('dual-rumble', { duration, strongMagnitude: strong, weakMagnitude: weak }); } catch (e) {}
+}
 function pollGamepad() {
   const pad = [...(navigator.getGamepads?.() || [])].find(p => p?.connected);
+  activePad = pad || null;
   const pressed = n => Boolean(pad?.buttons[n]?.pressed);
   const now = { left: pressed(14) || (pad?.axes[0] ?? 0) < -.35, right: pressed(15) || (pad?.axes[0] ?? 0) > .35,
     up: pressed(12) || (pad?.axes[1] ?? 0) < -.35, down: pressed(13) || (pad?.axes[1] ?? 0) > .35,
-    jump: pressed(0), shoot: pressed(1), start: pressed(9) };
+    jump: pressed(0), shoot: pressed(1), dash: pressed(2) || pressed(5) || pressed(7), start: pressed(9) };
   if (pad) {
     if (mode === 'title' && ((now.jump && !padPrevious.jump) || (now.start && !padPrevious.start))) {
       $('b-cont').style.display !== 'none' ? $('b-cont').click() : $('b-new').click();
@@ -142,7 +146,7 @@ function pollGamepad() {
     } else if (msgOpen && now.jump && !padPrevious.jump) msgAction();
     else {
       if (now.start && !padPrevious.start) togglePause();
-      for (const k of ['left','right','jump','shoot']) if (now[k] !== padPrevious[k]) setKey(k, now[k]);
+      for (const k of ['left','right','jump','shoot','dash']) if (now[k] !== padPrevious[k]) setKey(k, now[k]);
     }
     padHeld = true;
   } else if (padHeld) { for (const k in K) setKey(k, false); padHeld = false; }
@@ -152,7 +156,7 @@ function pollGamepad() {
 const KEYMAP = {
   ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   Space: 'jump', ArrowUp: 'jump', KeyW: 'jump', KeyK: 'jump',
-  KeyZ: 'shoot', KeyX: 'shoot', KeyJ: 'shoot',
+  KeyZ: 'shoot', KeyX: 'shoot', KeyJ: 'shoot', ShiftLeft: 'dash', ShiftRight: 'dash',
 };
 function setKey(k, v) { if (k === 'jump' && v && !K.jump) jumpEdge = true; K[k] = v; }
 addEventListener('keydown', e => {
@@ -186,13 +190,15 @@ const SFX = {
   buy: [['square', 523, 523, 0.07, 0.04], ['square', 784, 784, 0.07, 0.04, 0.07], ['square', 1047, 1047, 0.15, 0.04, 0.14]],
   clear: [['square', 523, 523, 0.1, 0.04], ['square', 659, 659, 0.1, 0.04, 0.1], ['square', 784, 784, 0.1, 0.04, 0.2], ['square', 1047, 1047, 0.35, 0.04, 0.3]],
   miss: [['triangle', 500, 120, 0.7, 0.07]], boom: [['sawtooth', 120, 40, 0.3, 0.08]], nope: [['square', 160, 140, 0.12, 0.04]],
+  land: [['triangle', 180, 70, 0.09, 0.06]], step: [['triangle', 130, 80, 0.04, 0.02]],
+  tick: [['square', 880, 880, 0.03, 0.02]], thud: [['sine', 90, 40, 0.14, 0.09]],
 };
-function sfx(name) {
+function sfx(name, rate = 1) {
   if (muted || !actx) return;
   const t0 = actx.currentTime;
   for (const [type, a, b, dur, vol, delay = 0] of SFX[name]) {
     const o = actx.createOscillator(), g = actx.createGain();
-    o.type = type; o.frequency.setValueAtTime(a, t0 + delay); o.frequency.exponentialRampToValueAtTime(b, t0 + delay + dur);
+    o.type = type; o.frequency.setValueAtTime(a * rate, t0 + delay); o.frequency.exponentialRampToValueAtTime(b * rate, t0 + delay + dur);
     g.gain.setValueAtTime(vol, t0 + delay); g.gain.exponentialRampToValueAtTime(0.0001, t0 + delay + dur);
     o.connect(g).connect(actx.destination); o.start(t0 + delay); o.stop(t0 + delay + dur + 0.02);
   }
@@ -276,12 +282,15 @@ function buildLevel(n) {
 /* ================= ワールド状態 ================= */
 let mode = 'title';
 let P, enemies, bullets, coinsArr, pickups, parts, texts, cam, shake, frame, goal, stageGot, stageStartCoins, modeT, bossRef;
+let hitstop = 0, coinCombo = 0, comboT = 0;
+// 当たった瞬間に数フレーム世界を止めて手応えを出す。長い方を優先する。
+const freeze = n => { hitstop = Math.max(hitstop, n); };
 
 function startStage(n) {
   calcStats();
   L = buildLevel(n);
   enemies = []; bullets = []; coinsArr = []; pickups = []; parts = []; texts = [];
-  shake = 0; frame = 0; modeT = 0; stageGot = 0; bossRef = null;
+  shake = 0; frame = 0; modeT = 0; stageGot = 0; bossRef = null; hitstop = 0; coinCombo = 0; comboT = 0;
   stageStartCoins = save.coins;
   for (const s of L.spawns) {
     const cx = s.tx * T, by = (s.ty + 1) * T;
@@ -358,6 +367,8 @@ function floatText(x, y, txt, c = '#fff') { texts.push({ x, y, txt, c, life: 40 
 
 /* ================= 更新 ================= */
 function update() {
+  if (hitstop > 0) { hitstop--; return; }
+  if (comboT > 0 && --comboT === 0) coinCombo = 0;
   if (P) rememberPosition(P);
   for (const entities of [enemies, bullets, coinsArr, pickups, parts, texts]) for (const entity of entities) rememberPosition(entity);
   frame++;
@@ -383,12 +394,32 @@ function updatePlayer() {
   const dir = (K.right ? 1 : 0) - (K.left ? 1 : 0);
   if (p.knock > 0) p.knock--;
   else {
-    const acc = p.onGround ? B.accelGround : ST.airAcc;
+    // 逆方向への切り返しは減速を強めてキビキビさせ、ブレーキ時に砂煙と足音を出す。
+    const turning = dir && p.vx * dir < -0.4;
+    const acc = (p.onGround ? B.accelGround : ST.airAcc) * (turning && p.onGround ? 2 : 1);
+    if (turning && p.onGround && frame % 4 === 0) {
+      burst(p.x + p.w / 2 - dir * 3, p.y + p.h, 2, ['#e8dcc0', '#cbb994'], 0.9, 0.01, 12);
+      if (!p.skid) sfx('step', 1.4);
+    }
+    p.skid = Boolean(turning && p.onGround);
+    const v0 = p.vx;
     if (dir) { p.vx += dir * acc; p.face = dir; }
     else if (p.onGround) p.vx = Math.abs(p.vx) <= B.friction ? 0 : p.vx - Math.sign(p.vx) * B.friction;
     else p.vx *= 0.97;
-    p.vx = Math.max(-ST.run, Math.min(ST.run, p.vx));
+    const maxRun = ST.run * (K.dash ? B.dashMul : 1);
+    // ダッシュで出した速度は、空中では保ち、地上ではダッシュ解除後に摩擦ぶんずつ通常速度へ戻る。
+    const limit = Math.max(maxRun, Math.abs(v0) - (p.onGround ? B.friction : 0));
+    p.vx = Math.max(-limit, Math.min(limit, p.vx));
   }
+  // 足音と足元の砂煙。歩幅は移動距離に比例させる。
+  if (p.onGround && Math.abs(p.vx) > 0.5) {
+    p.stepD = (p.stepD || 0) + Math.abs(p.vx);
+    if (p.stepD >= 15) {
+      p.stepD = 0; sfx('step', 0.9 + Math.random() * 0.25);
+      burst(p.x + p.w / 2 - p.face * 3, p.y + p.h, 1, ['#e8dcc0'], 0.5, 0.01, 10);
+    }
+  } else if (!p.onGround) p.stepD = 8;
+  if (p.land > 0) p.land--;
   // ジャンプ
   if (jumpEdge) p.buffer = B.jumpBuffer;
   if (p.buffer > 0) {
@@ -411,11 +442,24 @@ function updatePlayer() {
   if (p.vy >= 0) p.bouncing = false;
 
   if (moveX(p, p.vx)) p.vx = 0;
-  const wasGround = p.onGround;
+  // 頭上のブロックの角に数px引っかかった場合は横へずらして通す（コーナーコレクション）。
+  if (p.vy < 0) {
+    const ty = Math.floor((p.y + p.vy) / T), c0 = Math.floor(p.x / T), c1 = Math.floor((p.x + p.w - 0.01) / T);
+    if (c0 !== c1) {
+      if (solid(c0, ty) && !solid(c1, ty) && (c0 + 1) * T - p.x <= 4) moveX(p, (c0 + 1) * T - p.x + 0.01);
+      else if (solid(c1, ty) && !solid(c0, ty) && p.x + p.w - c1 * T <= 4) moveX(p, -(p.x + p.w - c1 * T) - 0.01);
+    }
+  }
+  const wasGround = p.onGround, fallV = p.vy;
   const hitY = moveY(p, p.vy);
   if (p.onGround) {
     p.coyote = B.coyote; p.jumpsUsed = 0;
-    if (!wasGround) burst(p.x + p.w / 2, p.y + p.h, 3, ['#e8dcc0'], 0.8, 0.02, 10);
+    if (!wasGround) {
+      const amp = Math.max(0, Math.min(1, (fallV - 1.2) / 4.2));
+      p.land = 8; p.landAmp = 0.25 + amp * 0.75;
+      burst(p.x + p.w / 2, p.y + p.h, 3 + Math.round(amp * 9), ['#e8dcc0', '#cbb994'], 0.8 + amp * 1.2, 0.02, 12 + amp * 8);
+      if (fallV > 1.2) sfx('land', 1.3 - amp * 0.5);
+    }
     const by = Math.floor((p.y + p.h + 1) / T);
     const l = Math.floor(p.x / T), r = Math.floor((p.x + p.w) / T);
     if (solid(l - 1, by) && solid(l, by) && solid(r, by) && solid(r + 1, by)) p.safe = { x: p.x, y: p.y };
@@ -430,7 +474,9 @@ function updatePlayer() {
     const bx = p.face > 0 ? p.x + p.w + 1 : p.x - 7, by = p.y + 8;
     const mk = vy => bullets.push({ x: bx, y: by, w: 6, h: 4, vx: p.face * B.shotSpeed, vy, life: ST.life, pierce: ST.pierce, hit: new Set() });
     if (ST.twoWay) { mk(-B.twoWayVy); mk(B.twoWayVy); } else mk(0);
-    sfx('shoot');
+    // 発射の閃光。連射でも同じ音にならないよう音程を揺らす。
+    burst(bx + (p.face > 0 ? 0 : 6), by + 2, 4, ['#bfe3ff', '#ffffff'], 1.4, 0, 8);
+    sfx('shoot', 0.92 + Math.random() * 0.2);
   }
 
   // トゲ
@@ -461,6 +507,7 @@ function hurt(dmg, dir, noKnock) {
   const p = P;
   if (p.inv > 0 && !noKnock) return;
   p.hp -= dmg; p.inv = ST.iframe; shake = 6; sfx('hurt'); hudDirty = true;
+  freeze(p.hp <= 0 ? 9 : 5); rumble(0.9, 0.6, 200);
   const h = document.getElementById('hearts'); h.classList.remove('ouch'); void h.offsetWidth; h.classList.add('ouch');
   if (!noKnock && !ST.firm) { p.vx = -dir * B.knockVx || -p.face * B.knockVx; p.vy = -B.knockVy; p.knock = 14; }
   if (p.hp <= 0) { p.hp = 0; mode = 'dying'; modeT = 0; p.vy = -6; sfx('miss'); }
@@ -471,13 +518,19 @@ function damageEnemy(e, d, fromX) {
   e.hp = Math.round((e.hp - d) * 10) / 10; e.flash = 6; e.bar = 150;
   floatText(e.x + e.w / 2, e.y - 4, Number.isInteger(d) ? String(d) : d.toFixed(1), '#fff');
   if (e.hp <= 0) killEnemy(e);
-  else { sfx('hit'); if (fromX !== undefined && e.type !== 'K') e.x += Math.sign(e.x - fromX) * 2; }
+  else {
+    sfx('hit', 0.9 + Math.random() * 0.25); freeze(2); shake = Math.max(shake, 1.2);
+    if (fromX !== undefined && e.type !== 'K') e.kvx = Math.sign(e.x - fromX) * 2.6;
+  }
 }
 function killEnemy(e) {
   e.dead = true; sfx('kill');
+  const big = e.type === 'K';
+  freeze(big ? 14 : 5); rumble(big ? 1 : 0.5, big ? 0.8 : 0.3, big ? 400 : 120);
+  if (!big) shake = Math.max(shake, 2.5);
   const cx = e.x + e.w / 2, cy = e.y + e.h / 2;
   const col = { s: ['#f59a2a', '#ffd99a'], b: ['#4aa8e8', '#cdeeff'], k: ['#8a5ad8', '#eceff8'], f: ['#b8d84a', '#7fcf5a'], K: ['#f59a2a', '#ffd166', '#fff'] }[e.type];
-  burst(cx, cy, e.type === 'K' ? 60 : 16, col, e.type === 'K' ? 4 : 2.2, 0.12, 34);
+  burst(cx, cy, big ? 60 : 16, col, big ? 4 : 2.2, 0.12, 34);
   if (e.type === 'K') shake = 14;
   const n = B.enemies[e.type].coin + ST.greed;
   for (let i = 0; i < n; i++) coinsArr.push({ x: cx - 4, y: cy - 4, vx: (Math.random() - 0.5) * 3, vy: -2.5 - Math.random() * 2.5, static: false, life: 600, ph: 0, w: 8, h: 8, onGround: false });
@@ -488,6 +541,7 @@ function stomp(e) {
   const p = P;
   p.vy = -(ST.bounce + (K.jump ? B.bounceHold : 0)); p.bouncing = true; p.jumpsUsed = 0; p.y = e.y - p.h;
   sfx('stomp'); burst(p.x + p.w / 2, p.y + p.h, 8, ['#fff', '#ffe08a'], 1.8, 0.05, 16);
+  freeze(3); shake = Math.max(shake, 3); rumble(0.4, 0.4, 100);
   if (e.type === 'K') e.squash = 12; else e.squash = 8;
   damageEnemy(e, ST.stomp);
   if (ST.shock) {
@@ -503,6 +557,7 @@ function updateEnemies() {
     if (e.dead) continue;
     if (!e.active) { if (e.x < cam + VW + 32 && e.x + e.w > cam - 32) { e.active = true; e.dir = p.x < e.x ? -1 : 1; } else continue; }
     e.t++; if (e.flash > 0) e.flash--; if (e.bar > 0) e.bar--; if (e.squash > 0) e.squash--;
+    if (e.kvx) { if (moveX(e, e.kvx)) e.kvx = 0; else e.kvx *= 0.78; if (Math.abs(e.kvx) < 0.05) e.kvx = 0; }
     const cfg = B.enemies[e.type];
     if (e.type === 'f') {
       const dx = p.x - e.x, near = Math.abs(dx) < 170 && mode === 'play';
@@ -520,7 +575,7 @@ function updateEnemies() {
       if (moveX(e, e.vx)) e.vx = 0;
       moveY(e, e.vy);
       if (wasAir && e.onGround && e.t > 30) {
-        shake = 7; sfx('boom'); e.squash = 10; burst(e.x + e.w / 2, e.y + e.h, 14, ['#e8dcc0', '#cbb994'], 2, 0.05, 20);
+        shake = 7; sfx('boom'); rumble(0.7, 0.3, 160); e.squash = 10; burst(e.x + e.w / 2, e.y + e.h, 14, ['#e8dcc0', '#cbb994'], 2, 0.05, 20);
         const minions = enemies.filter(o => o.type === 's' && !o.dead && Math.abs(o.x - e.x) < 200).length;
         if (minions < 3 && Math.random() < 0.5) { const m = mkEnemy('s', e.x + e.w / 2 - 8, e.y, L.n); m.active = true; m.vy = -4; m.dir = Math.random() < 0.5 ? -1 : 1; enemies.push(m); }
       }
@@ -565,7 +620,9 @@ function updateBullets() {
 function collect(x, y) {
   let v = 1;
   if (ST.lucky > 0 && Math.random() < ST.lucky) { v = 2; floatText(x, y - 6, 'x2', '#ffd166'); }
-  save.coins += v; stageGot += v; hudDirty = true; sfx('coin');
+  save.coins += v; stageGot += v; hudDirty = true;
+  sfx('coin', Math.pow(2, Math.min(coinCombo, 7) / 12)); coinCombo++; comboT = 24;
+  const pill = document.getElementById('coins'); pill.classList.remove('pop'); void pill.offsetWidth; pill.classList.add('pop');
   burst(x, y, 5, ['#fff3b0', '#f6c33a'], 1.2, 0, 12);
 }
 function magnetize(o) {
@@ -652,7 +709,7 @@ function gameOver() {
   showMsg('ミス！', `STAGE ${L.n} をもう一度`, 'リトライ', () => startStage(L.n));
 }
 function togglePause() {
-  if (mode === 'play') mode = 'pause';
+  if (mode === 'play') { mode = 'pause'; sfx('tick', 0.7); }
   else if (mode === 'pause') mode = 'play';
 }
 
@@ -712,7 +769,7 @@ function renderTree(popId) {
   }
   const g = $('t-graph'); g.style.width = W + 'px'; g.style.height = W + 'px'; g.style.setProperty('--ns', ns + 'px'); g.innerHTML = html;
   g.querySelectorAll('.node').forEach(b => {
-    b.onclick = () => { if (selId === b.dataset.id) buy(); else { selId = b.dataset.id; renderTree(); } };
+    b.onclick = () => { if (selId === b.dataset.id) buy(); else { selId = b.dataset.id; sfx('tick'); renderTree(); } };
   });
   // 詳細
   const s = SK[selId], cat = catOf(s), l = lv(s.id), isMax = l >= s.max, cost = isMax ? 0 : s.cost[l], ok = reqMet(s);
@@ -750,7 +807,7 @@ function treeKey(e) {
       const d = along + side * 2.2;
       if (d < bd) { bd = d; best = s; }
     }
-    if (best) { selId = best.id; renderTree(); }
+    if (best) { selId = best.id; sfx('tick'); renderTree(); }
   } else if (e.code === 'KeyZ' || e.code === 'Space') { e.preventDefault(); buy(); }
   else if (e.code === 'Enter') { e.preventDefault(); closeTree(); }
 }
@@ -784,7 +841,7 @@ function loop(now) {
     else if (mode !== 'pause' && mode !== 'tree' && mode !== 'over') update();
     acc -= 1000 / 60;
   }
-  draw(['pause', 'tree', 'over'].includes(mode) ? 1 : acc / (1000 / 60)); renderHUD();
+  draw(hitstop > 0 || ['pause', 'tree', 'over'].includes(mode) ? 1 : acc / (1000 / 60)); renderHUD();
   requestAnimationFrame(loop);
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden && mode === 'play') togglePause(); });

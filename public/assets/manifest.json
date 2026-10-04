@@ -463,5 +463,35 @@
     "path": "assets/ui/heart-fill.svg",
     "sha256": "2903966b0b1a314d61485658ec700fea9ac4b996621fbbc08117da1f35896b69",
     "bytes": 241
+  },
+  {
+    "path": "assets/witch-pixel/SOURCE.json",
+    "sha256": "16fdfe0380d97a8e2e6b85c5bb9014127c582b2240b32ea4771558d0cee0ceab",
+    "bytes": 2704
+  },
+  {
+    "path": "assets/witch-pixel/animations.json",
+    "sha256": "18a15e4ccdfe9cb150e159fdd31830e1662784752ebe5ed9d6dd2d03739ab7fe",
+    "bytes": 8874
+  },
+  {
+    "path": "assets/witch-pixel/idle.png",
+    "sha256": "b76ed51e0b7860288a36d7a68e3f4ffea5c2b03ba4e3836955251d888d8800f9",
+    "bytes": 19773
+  },
+  {
+    "path": "assets/witch-pixel/prompts.json",
+    "sha256": "cb9f1f7c5be5383ea40787178ba51473d2e1216e30740b4d7e4cdcbd48f01b10",
+    "bytes": 7572
+  },
+  {
+    "path": "assets/witch-pixel/witch-motions-v1.png",
+    "sha256": "15a000092dfabae3f45e5c8a1b43c2453ca9b6d60f6bd08c5e80bb051f7c39b6",
+    "bytes": 2174440
+  },
+  {
+    "path": "assets/witch-pixel/witch-walk-v2.png",
+    "sha256": "77f0f41b910592597e05ecf077bd75aa8c17c2d9da8c7ef70e6f863dae755aee",
+    "bytes": 1760554
   }
 ]

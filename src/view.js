@@ -9,11 +9,11 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { buildScenery } from './scenery.js';
+import { createPixelHero } from './pixel-hero.js';
 
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 const TILE = 16;
 const specifications = {
-  hero: ['adventurer', 'hero-v1'],
   exitGate: ['landmarks','exit-gate-v1'],
   stone: ['platformer', 'brick'], coin: ['platformer', 'coin-gold'], heart: ['platformer', 'heart'],
   spikes: ['platformer', 'trap-spikes'], ladder: ['platformer', 'ladder'],
@@ -259,16 +259,9 @@ export async function createView(canvas, onProgress) {
       actions[name].reset().fadeIn(name === 'Jump_Land' ? .06 : .16).play(); current = name;
     } };
   }
-  const hero = actor('hero', [.76, 1.55, .72]);
-  hero.group.traverse(mesh => {
-    if (!mesh.isMesh) return;
-    if (['Knife','Knife_Offhand','Throwable','1H_Crossbow','2H_Crossbow'].includes(mesh.name)) mesh.visible = false;
-    if (mesh.name === 'Rogue_Cape') mesh.material = new THREE.MeshStandardMaterial({color:'#b63823', roughness:.9, side:THREE.DoubleSide});
-    else { mesh.material = mesh.material.clone(); mesh.material.roughness = .85; }
-  });
-  hero.actions.Jump_Land.setLoop(THREE.LoopOnce, 1);
-  hero.actions.Jump_Land.clampWhenFinished = true;
-  scene.add(hero.group); hero.animate('Idle');
+  const hero = await createPixelHero(`${assetRoot}witch-pixel/`);
+  scene.add(hero.group);
+  const heroBaseScale = hero.group.scale.clone();
   const spellLight = new THREE.PointLight('#64c9ff',0,2.8,2);
   scene.add(spellLight);
   const creatures = new Map();
@@ -325,7 +318,7 @@ export async function createView(canvas, onProgress) {
   const exitLabel = textSprite('出口','#ffe1ac');exitLabel.scale.set(1.35,.67,1);exitLabel.position.set(0,4.43,.1);gate.add(exitLabel);
   let goalLocked = false;
   let cameraX = 5.7, cameraY = -13.8, lastTime = performance.now(), previousPlayer = null;
-  let wasGrounded = false, landingUntil = 0;
+  let squashSmooth = 1, lookAhead = 1.8;
   function sweep(map, live, cleanup = () => {}) {
     for (const [entity, object] of map) if (!live.has(entity)) {
       scene.remove(object.group || object); cleanup(object); map.delete(entity);
@@ -342,30 +335,37 @@ export async function createView(canvas, onProgress) {
     if (P) {
       const pos = samplePosition(P, alpha);
       hero.group.position.set((pos.x + P.w / 2) / TILE, -(pos.y + P.h) / TILE, 0);
-      if (previousPlayer !== P) { wasGrounded = P.onGround; landingUntil = 0; hero.group.rotation.y = P.face * (Math.PI / 2 - .22); }
-      if (moving) {
-        hero.group.rotation.y = THREE.MathUtils.damp(hero.group.rotation.y, P.face * (Math.PI / 2 - .22), 18, dt);
-        if (P.onGround && !wasGrounded) landingUntil = frame + 30;
-        wasGrounded = P.onGround;
-      }
-      const speed = Math.abs(P.vx);
       const firing = bullets.some(b => b.life>0 && b.vx*P.face>0 && Math.abs(b.x-(P.face>0?P.x+P.w:P.x))<18);
-      const name = mode === 'dying' ? 'Death_A_Pose' : mode === 'clearing' ? 'Cheer' : !P.onGround ? 'Jump_Idle' : speed > .12 ? 'Walking_A' : firing ? '1H_Ranged_Shooting' : frame < landingUntil ? 'Jump_Land' : 'Idle';
       spellLight.position.set(hero.group.position.x+P.face*.45,hero.group.position.y+.65,.6);
       if (moving) spellLight.intensity = THREE.MathUtils.damp(spellLight.intensity,firing?3:0,16,dt);
-      const rate = name === 'Walking_A' ? THREE.MathUtils.clamp(speed / 1.25 * .85, .3, 1.3) : name === 'Jump_Idle' ? .7 : 1;
-      hero.animate(name, rate); hero.mixer.update(moving ? dt : 0);
-      const targetX = THREE.MathUtils.clamp(hero.group.position.x + 1.8, halfWidth, Math.max(halfWidth, L.w - halfWidth));
+      hero.update(P, frame + alpha, mode);
+      // スカッシュ&ストレッチ：空中は速度で縦に伸び、着地後8Fは潰れてから戻る。
+      let squashY = 1;
+      if (mode === 'play' || mode === 'clearing') {
+        if (!P.onGround) squashY = 1 + THREE.MathUtils.clamp(Math.abs(P.vy) * .022, 0, .12);
+        else if (P.land > 0) squashY = 1 - (P.land / 8) * .2 * (P.landAmp ?? .3);
+      }
+      squashSmooth = THREE.MathUtils.damp(squashSmooth, squashY, 28, dt);
+      const squashXZ = 1 / Math.sqrt(squashSmooth);
+      hero.group.scale.set(heroBaseScale.x * squashXZ, heroBaseScale.y * squashSmooth, heroBaseScale.z * squashXZ);
+      // 向いている方向を先に映す。移動中だけ先読みして、止まるとゆっくり戻る。
+      const lookTarget = .6 + P.face * (Math.abs(P.vx) > .3 ? 1.6 : .8);
+      lookAhead = THREE.MathUtils.damp(lookAhead, lookTarget, 2.2, dt);
+      const targetX = THREE.MathUtils.clamp(hero.group.position.x + lookAhead, halfWidth, Math.max(halfWidth, L.w - halfWidth));
       const targetY = Math.max(-12.8, hero.group.position.y + 2);
-      if (previousPlayer !== P) { cameraX = targetX; cameraY = targetY; previousPlayer = P; }
+      if (previousPlayer !== P) { cameraX = targetX; cameraY = targetY; lookAhead = lookTarget; previousPlayer = P; }
       const follow = 1 - Math.exp(-dt * 7);
-      cameraX += (targetX - cameraX) * follow; cameraY += (targetY - cameraY) * follow;
+      cameraX += (targetX - cameraX) * follow;
+      // 縦：地上では穏やかに追い、空中は不感帯を超えた分だけ追う（ジャンプのたびに画面が揺れない）。
+      const dy = targetY - cameraY;
+      if (P.onGround || mode !== 'play') cameraY += dy * (1 - Math.exp(-dt * 4));
+      else cameraY += Math.sign(dy) * Math.max(0, Math.abs(dy) - 1.4) * follow;
     } else {
       spellLight.intensity = 0;
       cameraX = 6 + Math.sin(frame / 700) * 1.5; cameraY = -13.5;
       // The start scene also shows the playable character before the first button press.
       hero.group.visible = true; hero.group.position.set(2.5, -15, 0);
-      hero.group.rotation.y = Math.PI / 2 - .22; hero.animate('Idle'); hero.mixer.update(dt);
+      hero.group.scale.copy(heroBaseScale); hero.update(null, frame + alpha, mode);
     }
     const liveEnemies = new Set(enemies.filter(e => !e.dead && Math.abs(e.x / TILE - cameraX) < 20));
     sweep(creatures, liveEnemies, a => {a.mixer.stopAllAction(); a.mixer.uncacheRoot(a.group);});
@@ -436,9 +436,11 @@ export async function createView(canvas, onProgress) {
       portalMaterial.opacity = locked ? .045 : (mode === 'clearing' ? .38 : .15+.04*Math.sin(frame*.025));
       for(let i=0;i<motes.length;i++) {const phase=frame*.012+i*2.4;motes[i].visible=!locked;motes[i].position.set(Math.sin(phase)*.7,.35+(frame*.009+i*.21)%2.6,.2+Math.cos(phase)*.18);}
     } else gate.visible = false;
-    const vibration = moving && shake ? (Math.sin(frame * 2.6) * shake / TILE) : 0;
-    camera.position.set(cameraX + vibration, cameraY + 1.45, 20);
-    camera.lookAt(cameraX + vibration, cameraY, 0);
+    const tShake = now * .001;
+    const vibration = moving && shake ? (Math.sin(tShake * 150) * shake / TILE) : 0;
+    const vibrationY = moving && shake ? (Math.cos(tShake * 190) * shake * .6 / TILE) : 0;
+    camera.position.set(cameraX + vibration, cameraY + 1.45 + vibrationY, 20);
+    camera.lookAt(cameraX + vibration, cameraY + vibrationY, 0);
     // Face the camera so its pitch cannot expose the image's bottom edge.
     backdrop.quaternion.copy(camera.quaternion);
     backdrop.position.copy(camera.position).addScaledVector(camera.getWorldDirection(new THREE.Vector3()),110);
@@ -460,5 +462,5 @@ export async function createView(canvas, onProgress) {
     camera.aspect = aspect; halfWidth = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * 20 * aspect;
     camera.updateProjectionMatrix();
   }
-  return { render, resize, stats: () => ({calls:renderer.info.render.calls, triangles:renderer.info.render.triangles, models:Object.keys(models).length}) };
+  return { render, resize, stats: () => ({calls:renderer.info.render.calls, triangles:renderer.info.render.triangles, models:Object.keys(models).length, hero:hero.stats()}) };
 }

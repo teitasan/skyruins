@@ -2,6 +2,10 @@
 
 ## 採用
 
+現在の主人公はユーザー提供のピクセル魔女です。待機画像をそのまま使い、承認済みの歩行V2（8コマ）・ダッシュ・ジャンプ画像を再利用しています。原画像の権利は元の権利者に帰属し、CC0素材として扱っていません。参照画像、生成履歴、フレーム範囲と足元の基準点は `public/assets/witch-pixel/SOURCE.json`・`prompts.json`・`animations.json` に記録しています。旧KayKit主人公の素材と出典は履歴用に保持しています。
+
+2D主人公の描画は導入済みThree.js（MIT）の `Sprite` / `SpriteMaterial` / `CanvasTexture` を再利用しています。https://threejs.org/docs/pages/Sprite.html 。PNGを改変せず、既存プレビューと同じ切り出しとNearestFilterで描画します。アニメーションは物理更新の時間に合わせ、停止中やヒットストップ中にポーズが進まないようにしています。新しい描画ライブラリは追加していません。
+
 | 用途 | 配布元 | ライセンス | 出典 |
 | --- | --- | --- | --- |
 | 3D描画・glTF読み込み・アニメーション・静的メッシュ結合 | Three.js 0.180.0 | MIT | https://github.com/mrdoob/three.js |

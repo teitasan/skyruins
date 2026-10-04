@@ -1,0 +1,306 @@
+{
+  "meta": {
+    "image": "witch-motions-v1.png",
+    "size": {
+      "w": 1774,
+      "h": 887
+    },
+    "format": "RGBA8888",
+    "layout": "6 columns, 3 rows; use explicit frame rectangles, not uniform grid slicing",
+    "sourceScale": 0.44525547445255476,
+    "logicalCanvas": {
+      "w": 160,
+      "h": 160
+    },
+    "origin": {
+      "x": 80,
+      "y": 148
+    },
+    "filter": "nearest",
+    "facing": "right"
+  },
+  "idle": {
+    "image": "idle.png",
+    "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 93,
+      "h": 122
+    },
+    "pivot": {
+      "x": 57,
+      "y": 121
+    },
+    "scale": 1,
+    "durationMs": 1000
+  },
+  "animations": {
+    "walk": {
+      "loop": true,
+      "frames": [
+        {
+          "name": "walk-01",
+          "frame": {
+            "x": 26,
+            "y": 10,
+            "w": 260,
+            "h": 295
+          },
+          "pivot": {
+            "x": 156.0,
+            "y": 285
+          },
+          "durationMs": 120
+        },
+        {
+          "name": "walk-02",
+          "frame": {
+            "x": 328,
+            "y": 10,
+            "w": 257,
+            "h": 295
+          },
+          "pivot": {
+            "x": 154.2,
+            "y": 285
+          },
+          "durationMs": 120
+        },
+        {
+          "name": "walk-03",
+          "frame": {
+            "x": 626,
+            "y": 10,
+            "w": 256,
+            "h": 295
+          },
+          "pivot": {
+            "x": 153.6,
+            "y": 285
+          },
+          "durationMs": 120
+        },
+        {
+          "name": "walk-04",
+          "frame": {
+            "x": 918,
+            "y": 10,
+            "w": 256,
+            "h": 295
+          },
+          "pivot": {
+            "x": 153.6,
+            "y": 285
+          },
+          "durationMs": 120
+        },
+        {
+          "name": "walk-05",
+          "frame": {
+            "x": 1214,
+            "y": 10,
+            "w": 257,
+            "h": 295
+          },
+          "pivot": {
+            "x": 154.2,
+            "y": 285
+          },
+          "durationMs": 120
+        },
+        {
+          "name": "walk-06",
+          "frame": {
+            "x": 1510,
+            "y": 10,
+            "w": 258,
+            "h": 295
+          },
+          "pivot": {
+            "x": 154.8,
+            "y": 285
+          },
+          "durationMs": 120
+        }
+      ]
+    },
+    "dash": {
+      "loop": true,
+      "frames": [
+        {
+          "name": "dash-01",
+          "frame": {
+            "x": 4,
+            "y": 313,
+            "w": 307,
+            "h": 285
+          },
+          "pivot": {
+            "x": 190.34,
+            "y": 282
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "dash-02",
+          "frame": {
+            "x": 326,
+            "y": 313,
+            "w": 280,
+            "h": 284
+          },
+          "pivot": {
+            "x": 173.6,
+            "y": 282
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "dash-03",
+          "frame": {
+            "x": 619,
+            "y": 313,
+            "w": 277,
+            "h": 281
+          },
+          "pivot": {
+            "x": 171.74,
+            "y": 282
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "dash-04",
+          "frame": {
+            "x": 904,
+            "y": 313,
+            "w": 286,
+            "h": 283
+          },
+          "pivot": {
+            "x": 177.32,
+            "y": 282
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "dash-05",
+          "frame": {
+            "x": 1200,
+            "y": 312,
+            "w": 286,
+            "h": 282
+          },
+          "pivot": {
+            "x": 177.32,
+            "y": 283
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "dash-06",
+          "frame": {
+            "x": 1500,
+            "y": 314,
+            "w": 274,
+            "h": 293
+          },
+          "pivot": {
+            "x": 169.88,
+            "y": 281
+          },
+          "durationMs": 80
+        }
+      ]
+    },
+    "jump": {
+      "loop": false,
+      "frames": [
+        {
+          "name": "jump-01",
+          "frame": {
+            "x": 29,
+            "y": 613,
+            "w": 263,
+            "h": 264
+          },
+          "pivot": {
+            "x": 157.8,
+            "y": 257
+          },
+          "durationMs": 100
+        },
+        {
+          "name": "jump-02",
+          "frame": {
+            "x": 338,
+            "y": 596,
+            "w": 268,
+            "h": 281
+          },
+          "pivot": {
+            "x": 160.8,
+            "y": 274
+          },
+          "durationMs": 80
+        },
+        {
+          "name": "jump-03",
+          "frame": {
+            "x": 620,
+            "y": 594,
+            "w": 264,
+            "h": 252
+          },
+          "pivot": {
+            "x": 158.4,
+            "y": 276
+          },
+          "durationMs": 100
+        },
+        {
+          "name": "jump-04",
+          "frame": {
+            "x": 909,
+            "y": 598,
+            "w": 269,
+            "h": 260
+          },
+          "pivot": {
+            "x": 161.4,
+            "y": 272
+          },
+          "durationMs": 160
+        },
+        {
+          "name": "jump-05",
+          "frame": {
+            "x": 1200,
+            "y": 599,
+            "w": 271,
+            "h": 279
+          },
+          "pivot": {
+            "x": 162.6,
+            "y": 271
+          },
+          "durationMs": 100
+        },
+        {
+          "name": "jump-06",
+          "frame": {
+            "x": 1514,
+            "y": 616,
+            "w": 258,
+            "h": 262
+          },
+          "pivot": {
+            "x": 154.8,
+            "y": 254
+          },
+          "durationMs": 120
+        }
+      ]
+    }
+  }
+}

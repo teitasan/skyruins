@@ -49,6 +49,8 @@
   #hearts svg{width:calc(var(--u)*14); height:calc(var(--u)*12); shape-rendering:crispEdges}
   #hearts.ouch{animation:ouch .35s}
   @keyframes ouch{0%,100%{transform:none}25%{transform:translateX(calc(var(--u)*-2))}75%{transform:translateX(calc(var(--u)*2))}}
+  #coins.pop{animation:coinpop .22s ease-out}
+  @keyframes coinpop{0%{transform:scale(1)}35%{transform:scale(1.18)}100%{transform:scale(1)}}
   .pill{position:absolute; top:calc(var(--u)*7); display:flex; align-items:center; gap:.4em;
     background:rgba(8,14,26,.62); border-radius:999px; padding:.15em .7em .15em .35em; color:#fff}
   #coins{right:calc(var(--u)*10); font-size:calc(var(--u)*11)}

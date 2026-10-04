@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>魔女のスプライト｜Skyruins</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#11131c;color:#eeeaf5;font:15px/1.7 system-ui,sans-serif}main{max-width:1160px;margin:auto;padding:36px 24px 60px}.eyebrow{font-size:11px;color:#c3a5f2;letter-spacing:.18em}h1{font-size:28px;margin:8px 0}p{color:#bcb7ca;margin:8px 0 22px}.controls{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:24px 0}button,select,a.download{background:#252231;color:#e9e0fa;border:1px solid #554668;border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer}button:hover,a.download:hover{background:#3a304b}a{color:#dbc5ff;text-decoration:none}.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.card{border:1px solid #383341;border-radius:14px;overflow:hidden;background:#1d1b26}.card header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}.card h2{margin:0;font-size:17px}.chip{font:11px monospace;color:#c3a5f2}.stage{background-color:#222432;background-image:linear-gradient(45deg,#303140 25%,transparent 25%),linear-gradient(-45deg,#303140 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#303140 75%),linear-gradient(-45deg,transparent 75%,#303140 75%);background-size:24px 24px;background-position:0 0,0 12px,12px -12px,-12px 0}.stage canvas{width:100%;display:block;image-rendering:pixelated}.card footer{padding:12px 16px;font-size:12px;color:#c2bbd0}.frame{font:12px monospace;color:#d4bbf5}.sheet{margin-top:34px;border-top:1px solid #36313f;padding-top:24px}.sheet img{width:100%;image-rendering:pixelated;display:block}.sheet h2{font-size:18px}.legend{font-size:13px;margin:10px 0 18px}.files{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}.note{font-size:12px}label{display:flex;align-items:center;gap:8px}.light .stage{background:#dedbe5}.green .stage{background:#344c3b}@media(max-width:760px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:24px 14px}h1{font-size:23px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+</style>
+<main>
+<div class="eyebrow">SKYRUINS / CHARACTER ANIMATION</div>
+<h1>緑髪の魔女 ― 2D Pixel</h1>
+<p>歩行を8コマに改修。接地・体重移動・脚の交差・蹴り出しを描き直しました。待機は指定画像、ダッシュとジャンプは前の素材を使用しています。</p>
+<div class="controls"><button id="play">一時停止</button><button id="restart">先頭から再生</button><button id="compare">旧歩行と比較</button><button id="step">歩行を1コマ進める</button><button id="flip">左向きで確認</button><label>速度 <select id="speed"><option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="1.5">1.5×</option></select></label><label>背景 <select id="background"><option value="check">透過を確認</option><option value="light">明るい背景</option><option value="green">緑の背景</option></select></label></div>
+<div class="cards">
+<section class="card" data-motion="idle"><header><h2>待機</h2><span class="chip">ORIGINAL</span></header><div class="stage"><canvas width="160" height="160" aria-label="元画像そのままの待機ポーズ"></canvas></div><footer><span class="frame">1 / 1</span><br>提供画像を無加工で使用</footer></section>
+<section class="card" data-motion="walk"><header><h2>歩行 V2</h2><span class="chip">8 FRAMES</span></header><div class="stage"><canvas width="160" height="160" aria-label="歩行アニメーション"></canvas></div><footer><span class="frame"></span><br>接地・沈み込み・通過・蹴り出し</footer></section>
+<section class="card" data-motion="dash"><header><h2>ダッシュ</h2><span class="chip">6 FRAMES</span></header><div class="stage"><canvas width="160" height="160" aria-label="ダッシュアニメーション"></canvas></div><footer><span class="frame"></span><br>前傾・大きな踏み込み</footer></section>
+<section class="card" data-motion="jump"><header><h2>ジャンプ</h2><span class="chip">6 FRAMES</span></header><div class="stage"><canvas width="160" height="160" aria-label="踏み切りから着地までのジャンプアニメーション"></canvas></div><footer><span class="frame"></span><br>沈み込み → 上昇 → 頂点 → 着地</footer></section>
+</div>
+<div class="files"><a class="download" href="idle.png" download>待機 PNG</a><a class="download" href="witch-walk-v2.png" download>歩行 V2 PNG</a><a class="download" href="witch-motions-v1.png" download>ダッシュ・ジャンプ PNG</a><a class="download" href="animations.json" download>コマ座標 JSON</a></div>
+<p class="note">右向きが原画です。左向きは左右反転で確認できます。プレビューは共通の160×160描画枠・足元基準で表示しています。ジャンプの上下移動はゲーム側で制御する想定のため、ここではポーズを再生しています。</p>
+<section class="sheet"><h2>歩行 V2 ― 8コマ</h2><p class="legend">上段：右足の接地 → 沈み込み → 左脚の通過 → 右足の蹴り出し<br>下段：左足の接地 → 沈み込み → 右脚の通過 → 左足の蹴り出し</p><div class="stage"><img src="witch-walk-v2.png" alt="魔女の歩行改修版、8コマ"></div><p class="note">読み順は上段左から4コマ、続いて下段左から4コマ。1774×887 pxの透過PNG。コマ座標と足元基準をJSONに収録しています。</p></section>
+<p class="note">内蔵image_genで作成。<a href="prompts.json">生成プロンプト</a> · <a href="SOURCE.json">出典・素材情報</a></p>
+</main>
+<script type="module">
+const data=await fetch('./animations.json').then(r=>r.json());
+const load=src=>new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=reject;im.src=src});
+const images=Object.fromEntries(await Promise.all([...new Set([data.meta.image,data.idle.image,...Object.values(data.animations).map(a=>a.image).filter(Boolean)])].map(async src=>[src,await load(src)])));
+const atlas=images[data.meta.image],idle=images[data.idle.image];
+let playing=true,flipped=false,comparing=false,speed=1,time=0,last=performance.now();
+const cards=[...document.querySelectorAll('[data-motion]')].map(el=>({el,name:el.dataset.motion,ctx:el.querySelector('canvas').getContext('2d')}));
+const play=document.querySelector('#play');play.onclick=()=>{playing=!playing;play.textContent=playing?'一時停止':'再生'};
+document.querySelector('#compare').onclick=e=>{comparing=!comparing;e.target.textContent=comparing?'待機に戻す':'旧歩行と比較';const card=cards.find(c=>c.name==='idle');card.el.querySelector('h2').textContent=comparing?'旧歩行':'待機';card.el.querySelector('.chip').textContent=comparing?'6 FRAMES':'ORIGINAL';card.el.querySelector('footer').lastChild.textContent=comparing?'以前の6コマと横並びで比較':'提供画像を無加工で使用'};
+document.querySelector('#step').onclick=()=>{playing=false;play.textContent='再生';const seq=data.animations.walk.frames;let t=time%seq.reduce((n,f)=>n+f.durationMs,0),boundary=0;for(const f of seq){boundary+=f.durationMs;if(t<boundary){time+=boundary-t+.01;break}}};
+document.querySelector('#restart').onclick=()=>{time=0};
+document.querySelector('#flip').onclick=e=>{flipped=!flipped;e.target.textContent=flipped?'右向きで確認':'左向きで確認'};
+document.querySelector('#speed').onchange=e=>speed=Number(e.target.value);
+document.querySelector('#background').onchange=e=>document.body.className=e.target.value;
+function tick(now){
+ if(playing)time+=Math.min(now-last,100)*speed;last=now;
+ for(const {el,name,ctx} of cards){
+  let info=data.idle,im=idle,scale=1,index=0;
+  if(name!=='idle' || (name==='idle' && comparing)){
+   const animation=data.animations[name==='idle'?'walkPrevious':name];
+   const seq=animation.frames,total=seq.reduce((n,f)=>n+f.durationMs,0),period=total+(name==='jump'?420:0);
+   let t=time%period;index=seq.length-1;
+   for(let i=0;i<seq.length;i++){if(t<seq[i].durationMs){index=i;break}t-=seq[i].durationMs}
+   info=seq[index];im=images[animation.image||data.meta.image];scale=animation.scale||data.meta.sourceScale;
+   el.querySelector('.frame').textContent=`${index+1} / ${seq.length}`;
+  }
+  if(name==='idle' && !comparing)el.querySelector('.frame').textContent='1 / 1';
+  if(name==='walk')el.querySelector('footer').lastChild.textContent=data.animations.walk.frames[index].phase;
+  ctx.clearRect(0,0,160,160);ctx.imageSmoothingEnabled=false;ctx.save();
+  if(flipped){ctx.translate(160,0);ctx.scale(-1,1)}
+  const f=info.frame,p=info.pivot;
+  ctx.drawImage(im,f.x,f.y,f.w,f.h,Math.round(80-p.x*scale),Math.round(148-p.y*scale),Math.round(f.w*scale),Math.round(f.h*scale));ctx.restore();
+ }
+ requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+</script>
+</html>
